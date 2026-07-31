@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aplikasi Komunikasi AAC / PECS Lengkap</title>
+    <style>
+        /* Desain ramah sensorik */
+        :root {
+            --bg-color: #f0f4f8;
+            --text-color: #333;
+            --card-bg: #fff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --border-dashed: #cbd5e1;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            margin: 0; 
+            padding: 15px; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h2 { text-align: center; color: #475569; margin-bottom: 15px; }
+
+        /* Area kalimat (Sentence Strip) */
+        #sentence-strip { 
+            background-color: var(--card-bg); 
+            padding: 15px; 
+            border-radius: 12px; 
+            min-height: 100px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            box-shadow: var(--shadow); 
+            margin-bottom: 20px; 
+            flex-wrap: wrap; 
+            border: 2px dashed var(--border-dashed);
+            transition: all 0.3s ease;
+        }
+
+        .sentence-item { 
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #e2e8f0; 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            font-weight: bold;
+            animation: popIn 0.2s ease-out;
+            cursor: pointer;
+        }
+        
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .sentence-item .emoji { font-size: 30px; margin-bottom: 4px; }
+        .sentence-item .word { font-size: 14px; }
+
+        /* Kategori dan Grid Kartu */
+        .category { margin-bottom: 25px; }
+        .category h3 { 
+            margin-bottom: 10px; 
+            color: #475569; 
+            border-bottom: 2px solid #e2e8f0; 
+            padding-bottom: 5px; 
+            font-size: 1.1rem;
+        }
+        
+        .grid { 
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px; 
+        }
+
+        /* Desain Kartu PECS */
+        .pecs-card { 
+            background-color: var(--card-bg); 
+            border: 3px solid #e2e8f0; 
+            border-radius: 12px; 
+            padding: 12px 8px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s; 
+            font-weight: bold;
+            font-size: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1/1;
+        }
+        
+        .pecs-card:active { transform: scale(0.92); }
+        .pecs-card .emoji { font-size: 40px; display: block; margin: 0 auto 8px; line-height: 1; }
+
+        /* Warna Kategori */
+        .subjek { background-color: #fef08a; border-color: #fde047; }
+        .kata-kerja { background-color: #bbf7d0; border-color: #86efac; }
+        .benda { background-color: #bae6fd; border-color: #7dd3fc; }
+        .perasaan { background-color: #fbcfe8; border-color: #f9a8d4; }
+        .tempat { background-color: #ddd6fe; border-color: #c4b5fd; } /* Ungu pastel */
+        .waktu { background-color: #fed7aa; border-color: #fdba74; } /* Oranye pastel */
+
+        /* Tombol Kontrol */
+        .controls { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button { 
+            padding: 12px 20px; 
+            font-size: 16px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        button:active { transform: scale(0.95); }
+        .btn-speak { background-color: #3b82f6; color: white; }
+        .btn-clear { background-color: #94a3b8; color: white; }
+        .btn-save { background-color: #10b981; color: white; }
+        .btn-fav { background-color: #f59e0b; color: white; }
+
+        /* Bagian Favorit */
+        #favorites-section {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: none; /* Hidden by default */
+        }
+        
+        #favorites-section.active { display: block; }
+        
+        .fav-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .fav-item {
+            background-color: #fef3c7;
+            border: 2px solid #fcd34d;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 8px; }
+            .pecs-card { padding: 8px 4px; font-size: 13px; }
+            .pecs-card .emoji { font-size: 32px; }
+            button { font-size: 14px; padding: 10px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <h2>🗣️ Alat Bantu Komunikasi (AAC)</h2>
+
+    <!-- Area Kalimat -->
+    <div id="sentence-strip">
+        <span style="color: #94a3b8; width: 100%; text-align: center;" id="placeholder-text">Ketuk kartu di bawah untuk membentuk kalimat...</span>
+    </div>
+    
+    <div class="controls">
+        <button class="btn-speak" onclick="speakSentence()">🔊 Bicara</button>
+        <button class="btn-clear" onclick="clearSentence()">❌ Hapus</button>
+        <button class="btn-save" onclick="saveAsFavorite()">⭐ Simpan</button>
+        <button class="btn-fav" onclick="toggleFavorites()">📂 Favorit</button>
+    </div>
+
+    <!-- Bagian Favorit -->
+    <div id="favorites-section">
+        <h3>⭐ Kalimat Favorit</h3>
+        <div class="fav-list" id="fav-list"></div>
+    </div>
+
+    <!-- Pilihan Kartu PECS -->
+    <div class="category">
+        <h3>Subjek / Orang</h3>
+        <div class="grid">
+            <div class="pecs-card subjek" onclick="addWord('Aku', '🧑')"><span class="emoji">🧑</span>Aku</div>
+            <div class="pecs-card subjek" onclick="addWord('Kamu', '👉')"><span class="emoji">👉</span>Kamu</div>
+            <div class="pecs-card subjek" onclick="addWord('Bunda', '👩')"><span class="emoji">👩</span>Bunda</div>
+            <div class="pecs-card subjek" onclick="addWord('Ayah', '👨')"><span class="emoji">👨</span>Ayah</div>
+            <div class="pecs-card subjek" onclick="addWord('Guru', '👩‍🏫')"><span class="emoji">👩‍🏫</span>Guru</div>
+        </div>
+    </div>
+
+    <div class="category">
+        <h3>Kata Kerja (Manding)</h3>
+        <div class="grid">
+            <div class="pecs-card kata-kerja" onclick="addWord('Mau', '🤲')"><span class="emoji">🤲</span>Mau</div>
+            <div class="pecs-card kata-kerja" onclick="addWord('Tidak Mau', '🙅')"><span class="emoji">🙅</span>Tidak Mau</div>
+            <div class="pecs-card kata-kerja" onclick="addWord('Makan', '🍽️')"><span class="emoji">🍽️</span>Makan</div>
+            <div class="pecs-card kata-kerja" onclick="addWord('Minum', '🥛')"><span class="emoji">🥛</span>Minum</div>
+            <div class="pecs-card kata-kerja" onclick="addWord('Main', '🧩')"><span class="emoji">🧩</span>Main</div>
+            <div class="pecs-card kata-kerja" onclick="addWord('Tidur', '😴')"><span class="emoji">😴</span>Tidur</div>
+            <div class="pecs-card kata-kerja" onclick="addWord('Mandi', '🚿')"><span class="emoji">🚿</span>Mandi</div>
+        </div>
+    </div>
+
+    <div class="category">
+        <h3>Benda / Aktivitas</h3>
+        <div class="grid">
+            <div class="pecs-card benda" onclick="addWord('Nasi Telur', '🍳')"><span class="emoji">🍳</span>Nasi Telur</div>
+            <div class="pecs-card benda" onclick="addWord('Air Putih', '💧')"><span class="emoji">💧</span>Air Putih</div>
+            <div class="pecs-card benda" onclick="addWord('Susu', '🥛')"><span class="emoji">🥛</span>Susu</div>
+            <div class="pecs-card benda" onclick="addWord('Mobilan', '🚗')"><span class="emoji">🚗</span>Mobilan</div>
+            <div class="pecs-card benda" onclick="addWord('Boneka', '🧸')"><span class="emoji">🧸</span>Boneka</div>
+            <div class="pecs-card benda" onclick="addWord('Buku', '📚')"><span class="emoji">📚</span>Buku</div>
+            <div class="pecs-card benda" onclick="addWord('Toilet', '🚽')"><span class="emoji">🚽</span>Toilet</div>
+            <div class="pecs-card benda" onclick="addWord('Handphone', '📱')"><span class="emoji">📱</span>HP</div>
+        </div>
+    </div>
+
+    <div class="category">
+        <h3>Perasaan / Emosi</h3>
+        <div class="grid">
+            <div class="pecs-card perasaan" onclick="addWord('Senang', '😊')"><span class="emoji">😊</span>Senang</div>
+            <div class="pecs-card perasaan" onclick="addWord('Sedih', '😢')"><span class="emoji">😢</span>Sedih</div>
+            <div class="pecs-card perasaan" onclick="addWord('Marah', '😠')"><span class="emoji">😠</span>Marah</div>
+            <div class="pecs-card perasaan" onclick="addWord('Sakit', '🤕')"><span class="emoji">🤕</span>Sakit</div>
+            <div class="pecs-card perasaan" onclick="addWord('Takut', '😨')"><span class="emoji">😨</span>Takut</div>
+            <div class="pecs-card perasaan" onclick="addWord('Lelah', '😫')"><span class="emoji">😫</span>Lelah</div>
+        </div>
+    </div>
+
+    <div class="category">
+        <h3>Tempat</h3>
+        <div class="grid">
+            <div class="pecs-card tempat" onclick="addWord('Rumah', '🏠')"><span class="emoji">🏠</span>Rumah</div>
+            <div class="pecs-card tempat" onclick="addWord('Sekolah', '🏫')"><span class="emoji">🏫</span>Sekolah</div>
+            <div class="pecs-card tempat" onclick="addWord('Taman', '🌳')"><span class="emoji">🌳</span>Taman</div>
+            <div class="pecs-card tempat" onclick="addWord('Toko', '🏪')"><span class="emoji">🏪</span>Toko</div>
+            <div class="pecs-card tempat" onclick="addWord('Dapur', '🍳')"><span class="emoji">🍳</span>Dapur</div>
+        </div>
+    </div>
+
+    <div class="category">
+        <h3>Waktu</h3>
+        <div class="grid">
+            <div class="pecs-card waktu" onclick="addWord('Sekarang', '⏰')"><span class="emoji">⏰</span>Sekarang</div>
+            <div class="pecs-card waktu" onclick="addWord('Nanti', '⏳')"><span class="emoji">⏳</span>Nanti</div>
+            <div class="pecs-card waktu" onclick="addWord('Pagi', '🌅')"><span class="emoji">🌅</span>Pagi</div>
+            <div class="pecs-card waktu" onclick="addWord('Malam', '🌙')"><span class="emoji">🌙</span>Malam</div>
+        </div>
+    </div>
+
+    <script>
+        let sentence = [];
+        let favorites = JSON.parse(localStorage.getItem('aac_favorites')) || [];
+
+        // Fungsi menambahkan kata ke kalimat
+        function addWord(word, emoji) {
+            if (sentence.length < 8) { // Batas dinaikkan jadi 8 kata
+                sentence.push({word, emoji});
+                updateStrip();
+                playClickSound();
+            } else {
+                alert('Kalimat sudah penuh. Silakan hapus atau bicara dulu.');
+            }
+        }
+
+        // Fungsi memperbarui tampilan sentence strip
+        function updateStrip() {
+            const strip = document.getElementById('sentence-strip');
+            const placeholder = document.getElementById('placeholder-text');
+            
+            strip.innerHTML = '';
+            
+            if (sentence.length === 0) {
+                strip.appendChild(placeholder);
+                placeholder.style.display = 'block';
+            } else {
+                sentence.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'sentence-item';
+                    div.innerHTML = `<div class="emoji">${item.emoji}</div><div class="word">${item.word}</div>`;
+                    // Klik item untuk menghapusnya
+                    div.onclick = () => removeWord(index);
+                    strip.appendChild(div);
+                });
+            }
+        }
+
+        // Fungsi menghapus satu kata dari kalimat
+        function removeWord(index) {
+            sentence.splice(index, 1);
+            updateStrip();
+        }
+
+        // Fungsi menghapus seluruh kalimat
+        function clearSentence() {
+            sentence = [];
+            updateStrip();
+        }
+
+        // Fungsi Text-to-Speech
+        function speakSentence() {
+            if (sentence.length === 0) return;
+            
+            const textToSpeak = sentence.map(item => item.word).join(' ');
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.85;
+            utterance.pitch = 1.1;
+            
+            window.speechSynthesis.cancel(); // Hentikan suara sebelumnya jika ada
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Efek suara klik sederhana (opsional)
+        function playClickSound() {
+            // Bisa ditambahkan audio file jika diinginkan
+            // Untuk sekarang hanya visual feedback saja
+        }
+
+        // Fungsi menyimpan kalimat sebagai favorit
+        function saveAsFavorite() {
+            if (sentence.length === 0) {
+                alert('Buat kalimat terlebih dahulu untuk disimpan.');
+                return;
+            }
+            
+            const sentenceText = sentence.map(item => `${item.emoji} ${item.word}`).join(' ');
+            
+            // Cek apakah sudah ada di favorit
+            if (!favorites.includes(sentenceText)) {
+                favorites.push(sentenceText);
+                localStorage.setItem('aac_favorites', JSON.stringify(favorites));
+                alert('Kalimat disimpan ke favorit!');
+                renderFavorites();
+            } else {
+                alert('Kalimat ini sudah ada di favorit.');
+            }
+        }
+
+        // Fungsi menampilkan/menyembunyikan bagian favorit
+        function toggleFavorites() {
+            const favSection = document.getElementById('favorites-section');
+            favSection.classList.toggle('active');
+            if (favSection.classList.contains('active')) {
+                renderFavorites();
+            }
+        }
+
+        // Fungsi menampilkan daftar favorit
+        function renderFavorites() {
+            const favList = document.getElementById('fav-list');
+            favList.innerHTML = '';
+            
+            if (favorites.length === 0) {
+                favList.innerHTML = '<p style="color: #94a3b8; width: 100%;">Belum ada kalimat favorit.</p>';
+                return;
+            }
+            
+            favorites.forEach((fav, index) => {
+                const div = document.createElement('div');
+                div.className = 'fav-item';
+                div.innerHTML = fav;
+                
+                // Klik untuk menggunakan kalimat favorit
+                div.onclick = () => loadFavorite(fav);
+                
+                // Tambah tombol hapus kecil
+                const deleteBtn = document.createElement('span');
+                deleteBtn.innerHTML = ' ❌';
+                deleteBtn.style.cursor = 'pointer';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeFavorite(index);
+                };
+                
+                div.appendChild(deleteBtn);
+                favList.appendChild(div);
+            });
+        }
+
+        // Fungsi memuat kalimat dari favorit
+        function loadFavorite(favText) {
+            // Parse emoji dan kata dari teks favorit
+            const parts = favText.split(' ').filter(part => part.trim() !== '');
+            sentence = [];
+            
+            // Rekonstruksi array sentence dari teks
+            // Ini sederhana, asumsi format: emoji word emoji word ...
+            for (let i = 0; i < parts.length; i += 2) {
+                if (parts[i] && parts[i+1]) {
+                    sentence.push({
+                        emoji: parts[i],
+                        word: parts[i+1]
+                    });
+                }
+            }
+            
+            updateStrip();
+            toggleFavorites(); // Tutup panel favorit setelah memilih
+        }
+
+        // Fungsi menghapus dari favorit
+        function removeFavorite(index) {
+            favorites.splice(index, 1);
+            localStorage.setItem('aac_favorites', JSON.stringify(favorites));
+            renderFavorites();
+        }
+
+        // Inisialisasi
+        updateStrip();
+    </script>
+</body>
+</html>
