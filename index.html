@@ -490,4 +490,268 @@
                 { id: 't_siang', word: 'Siang', emoji: '☀️', level: 2 },
                 { id: 't_sore', word: 'Sore', emoji: '🌇', level: 2 },
                 { id: 't_besok', word: 'Besok', emoji: '⏭️', level: 2 },
-             
+                { id: 't_kemarin', word: 'Kemarin', emoji: '⏮️', level: 2 },
+                // Lv 3
+                { id: 't_sebentar', word: 'Sebentar lagi', emoji: '⏱️', level: 3 },
+                { id: 't_hariini', word: 'Hari ini', emoji: '📅', level: 3 },
+                { id: 't_jam7', word: 'Jam 7', emoji: '🕖', level: 3 },
+                { id: 't_jam12', word: 'Jam 12', emoji: '🕛', level: 3 },
+                // Lv 4
+                { id: 't_senin', word: 'Senin - Jumat', emoji: '🗓️', level: 4 },
+                { id: 't_libur', word: 'Libur', emoji: '🎉', level: 4 },
+                { id: 't_jam15', word: 'Jam 3 Sore', emoji: '🕒', level: 4 },
+                // Lv 5
+                { id: 't_tepat', word: 'Tepat Waktu', emoji: '✅', level: 5 },
+                { id: 't_telat', word: 'Terlambat', emoji: '❌', level: 5 },
+            ],
+            perasaan: [
+                // Lv 1
+                { id: 'f_senang', word: 'Senang', emoji: '😊', level: 1 },
+                { id: 'f_sedih', word: 'Sedih', emoji: '😢', level: 1 },
+                { id: 'f_marah', word: 'Marah', emoji: '😠', level: 1 },
+                { id: 'f_sakit', word: 'Sakit', emoji: '🤕', level: 1 },
+                { id: 'f_takut', word: 'Takut', emoji: '😨', level: 1 },
+                // Lv 2
+                { id: 'f_lelah', word: 'Lelah', emoji: '😫', level: 2 },
+                { id: 'f_lapar', word: 'Lapar', emoji: '🤤', level: 2 },
+                { id: 'f_haus', word: 'Haus', emoji: '🥵', level: 2 },
+                { id: 'f_ngantuk', word: 'Ngantuk', emoji: '🥱', level: 2 },
+                // Lv 3
+                { id: 'f_bosan', word: 'Bosan', emoji: '😒', level: 3 },
+                { id: 'f_bingung', word: 'Bingung', emoji: '😕', level: 3 },
+                { id: 'f_malu', word: 'Malu', emoji: '😳', level: 3 },
+                // Lv 4
+                { id: 'f_gugup', word: 'Gugup', emoji: '😬', level: 4 },
+                { id: 'f_bangga', word: 'Bangga', emoji: '😎', level: 4 },
+                { id: 'f_sepi', word: 'Kesepian', emoji: '😔', level: 4 },
+                // Lv 5
+                { id: 'f_stres', word: 'Stres / Frustrasi', emoji: '🤯', level: 5 },
+                { id: 'f_lega', word: 'Lega', emoji: '😌', level: 5 },
+            ]
+        };
+
+        // State Aplikasi
+        let sentence = [];
+        let isEditMode = false;
+        
+        // Load dari LocalStorage
+        let appConfig = JSON.parse(localStorage.getItem('aac_config')) || {
+            setupDone: false,
+            ageLevel: 1,
+            gender: 'L',
+            hiddenCards: []
+        };
+
+        // Inisialisasi
+        window.onload = () => {
+            if (appConfig.setupDone) {
+                document.getElementById('select-age').value = appConfig.ageLevel;
+                document.getElementById('select-gender').value = appConfig.gender;
+                goToPage('page-main');
+                renderApp();
+            }
+        };
+
+        function goToPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function openSettings() {
+            goToPage('page-settings');
+        }
+
+        function saveSettingsAndStart() {
+            appConfig.ageLevel = parseInt(document.getElementById('select-age').value);
+            appConfig.gender = document.getElementById('select-gender').value;
+            appConfig.setupDone = true;
+            
+            localStorage.setItem('aac_config', JSON.stringify(appConfig));
+            goToPage('page-main');
+            renderApp();
+        }
+
+        function toggleEditMode() {
+            if (!isEditMode) {
+                // Info sandi untuk ortu
+                document.getElementById('parent-info-text').style.display = 'block';
+                const pin = prompt("Masukkan kode sandi orang tua (2 digit):");
+                if (pin === "18") {
+                    isEditMode = true;
+                    document.getElementById('edit-btn').innerHTML = '🔓 Selesai';
+                    document.getElementById('edit-btn').style.backgroundColor = '#10b981';
+                    document.getElementById('edit-btn').style.color = 'white';
+                    renderApp();
+                } else if (pin !== null) {
+                    alert("Kode salah!");
+                    document.getElementById('parent-info-text').style.display = 'none';
+                } else {
+                    document.getElementById('parent-info-text').style.display = 'none';
+                }
+            } else {
+                isEditMode = false;
+                document.getElementById('edit-btn').innerHTML = '🔒 Edit';
+                document.getElementById('edit-btn').style.backgroundColor = 'white';
+                document.getElementById('edit-btn').style.color = 'black';
+                document.getElementById('parent-info-text').style.display = 'none';
+                renderApp();
+            }
+        }
+
+        function toggleCardVisibility(e, cardId) {
+            e.stopPropagation(); // Cegah klik kartu
+            if (!isEditMode) return;
+
+            const index = appConfig.hiddenCards.indexOf(cardId);
+            if (index > -1) {
+                appConfig.hiddenCards.splice(index, 1); // Tampilkan
+            } else {
+                appConfig.hiddenCards.push(cardId); // Sembunyikan
+            }
+            localStorage.setItem('aac_config', JSON.stringify(appConfig));
+            renderApp();
+        }
+
+        function renderApp() {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = '';
+            
+            // Konfigurasi Kategori untuk dirender berurutan (Perasaan di paling bawah)
+            const categoriesToRender = [
+                { key: 'subjek', title: 'Subjek / Orang', class: 'subjek' },
+                { key: 'katakerja', title: 'Kata Kerja (Manding)', class: 'kata-kerja' },
+                { key: 'benda', title: 'Benda / Aktivitas', class: 'benda' },
+                { key: 'tempat', title: 'Tempat', class: 'tempat' },
+                { key: 'waktu', title: 'Waktu', class: 'waktu' },
+                { key: 'perasaan', title: 'Perasaan / Emosi', class: 'perasaan' }
+            ];
+
+            const currentLevel = appConfig.ageLevel;
+
+            categoriesToRender.forEach(cat => {
+                const items = db[cat.key].filter(item => item.level <= currentLevel);
+                
+                // Jika tidak ada item yang lolos filter (dan tidak di edit mode), lewati
+                let visibleItemsCount = items.filter(i => !appConfig.hiddenCards.includes(i.id)).length;
+                if (visibleItemsCount === 0 && !isEditMode) return;
+
+                const catDiv = document.createElement('div');
+                catDiv.className = 'category';
+                catDiv.innerHTML = `<h3>${cat.title}</h3>`;
+                
+                const grid = document.createElement('div');
+                grid.className = 'grid';
+
+                items.forEach(item => {
+                    const isHidden = appConfig.hiddenCards.includes(item.id);
+                    
+                    // Jika bukan edit mode dan item di-hidden, jangan render
+                    if (!isEditMode && isHidden) return;
+
+                    const card = document.createElement('div');
+                    card.className = `pecs-card ${cat.class} ${isHidden ? 'hidden-item' : ''}`;
+                    
+                    // Penyesuaian Emoji berdasarkan Gender (khusus Aku/Kamu)
+                    let displayEmoji = item.emoji;
+                    if (typeof item.emoji === 'object') {
+                        displayEmoji = item.emoji[appConfig.gender] || item.emoji['L'];
+                    }
+
+                    card.innerHTML = `
+                        <div class="toggle-visibility-btn" onclick="toggleCardVisibility(event, '${item.id}')">
+                            ${isHidden ? '👁️' : '❌'}
+                        </div>
+                        <span class="emoji">${displayEmoji}</span>
+                        <span>${item.word}</span>
+                    `;
+
+                    // Fungsi klik utama (tambah ke kalimat)
+                    card.onclick = () => {
+                        if (!isEditMode) addWord(item.word, displayEmoji);
+                    };
+
+                    grid.appendChild(card);
+                });
+
+                if (isEditMode) catDiv.classList.add('edit-mode');
+                catDiv.appendChild(grid);
+                container.appendChild(catDiv);
+            });
+
+            updateStrip();
+        }
+
+        function addWord(word, emoji) {
+            if (sentence.length < 8) {
+                sentence.push({word, emoji});
+                updateStrip();
+            } else {
+                alert('Kalimat sudah penuh.');
+            }
+        }
+
+        function updateStrip() {
+            const strip = document.getElementById('sentence-strip');
+            const placeholder = document.getElementById('placeholder-text');
+            
+            strip.innerHTML = '';
+            
+            if (sentence.length === 0) {
+                strip.appendChild(placeholder);
+                placeholder.style.display = 'block';
+            } else {
+                sentence.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'sentence-item';
+                    div.innerHTML = `<div class="emoji">${item.emoji}</div><div class="word">${item.word}</div>`;
+                    div.onclick = () => removeWord(index);
+                    strip.appendChild(div);
+                });
+            }
+        }
+
+        function removeWord(index) {
+            sentence.splice(index, 1);
+            updateStrip();
+        }
+
+        function clearSentence() {
+            sentence = [];
+            updateStrip();
+        }
+
+        function speakSentence() {
+            if (sentence.length === 0) return;
+            
+            const textToSpeak = sentence.map(item => item.word).join(' ');
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'id-ID';
+                
+                // Modifikasi pitch berdasarkan gender yang dipilih di pengaturan
+                // (Ini pendekatan gratis & universal di berbagai device)
+                if (appConfig.gender === 'L') {
+                    utterance.pitch = 0.7; // Lebih berat/rendah
+                    utterance.rate = 0.9;
+                } else {
+                    utterance.pitch = 1.3; // Lebih tinggi
+                    utterance.rate = 1.0;
+                }
+                
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Maaf, browser Anda tidak mendukung fitur suara.");
+            }
+        }
+    </script>
+    <script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js');
+    });
+}
+</script>
+</body>
+</html>
