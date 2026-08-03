@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bicara Pecs by @zakymza</title>
     
+    <!-- PWA Meta Tags untuk Nama Aplikasi -->
     <meta name="application-name" content="Bicara Pecs by @zakymza">
     <meta name="apple-mobile-web-app-title" content="Bicara Pecs by @zakymza">
     <meta name="theme-color" content="#3b82f6" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1e293b" media="(prefers-color-scheme: dark)">
     
+    <!-- Link ke manifest -->
     <link rel="manifest" href="manifest.json">
     
     <style>
+        /* Variabel Tema Terang (Default) */
         :root {
             --bg-color: #f0f4f8;
             --text-color: #334155;
@@ -26,17 +29,20 @@
             --modal-bg: #f8fafc;
         }
 
-        .dark-theme {
-            --bg-color: #0f172a;
-            --text-color: #e2e8f0;
-            --card-bg: #1e293b;
-            --card-text: #0f172a;
-            --shadow: 0 4px 6px rgba(0,0,0,0.3);
-            --border-color: #334155;
-            --border-dashed: #475569;
-            --primary: #2563eb;
-            --sidebar-bg: #1e293b;
-            --modal-bg: #0f172a;
+        /* Variabel Tema Gelap */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --text-color: #e2e8f0;
+                --card-bg: #1e293b;
+                --card-text: #0f172a; 
+                --shadow: 0 4px 6px rgba(0,0,0,0.3);
+                --border-color: #334155;
+                --border-dashed: #475569;
+                --primary: #2563eb;
+                --sidebar-bg: #1e293b;
+                --modal-bg: #0f172a;
+            }
         }
 
         body { 
@@ -65,8 +71,8 @@
         .btn-secondary { background-color: var(--border-color); color: var(--text-color); border: none; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: background 0.2s;}
         .btn-secondary:active { transform: scale(0.98); }
 
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; line-height: 1.4; }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 10px; font-weight: bold; line-height: 1.4; }
         .form-group select, .form-group input { width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-color); color: var(--text-color); box-sizing: border-box; }
         .radio-group { display: flex; flex-direction: column; gap: 10px; }
         .radio-option { display: flex; align-items: flex-start; gap: 10px; background: var(--modal-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer; }
@@ -145,7 +151,7 @@
 </head>
 <body>
 
-    <!-- Sidebar Menu (Urutan Sesuai Permintaan) -->
+    <!-- Sidebar Menu -->
     <div class="overlay" id="overlay" onclick="closeMenu()"></div>
     <div class="sidebar" id="sidebar">
         <button class="close-sidebar" onclick="closeMenu()">×</button>
@@ -396,13 +402,22 @@
                 { id: 'v_tidur', word: 'Tidur', emoji: '😴', level: 1 },
                 { id: 'v_mandi', word: 'Mandi', emoji: '🚿', level: 1 },
                 { id: 'v_pipis', word: 'Pipis', emoji: '🚽', level: 1 },
-                { id: 'v_eek', word: 'EEK/BAB', emoji: '💩', level: 1 },
+                { id: 'v_eek', word: 'Eek/BAB', emoji: '💩', level: 1 },
                 { id: 'v_sakit', word: 'Sakit', emoji: '🤕', level: 1 },
+
                 // Level 2
+                { id: 'v_bangun', word: 'Bangun tidur', emoji: '⏰', level: 2 },
+                { id: 'v_makan_pagi', word: 'Makan pagi', emoji: '🍳', level: 2 },
+                { id: 'v_makan_siang', word: 'Makan siang', emoji: '🍲', level: 2 },
+                { id: 'v_makan_malam', word: 'Makan malam', emoji: '🍛', level: 2 },
                 { id: 'v_buka', word: 'Buka', emoji: '👐', level: 2 },
                 { id: 'v_tutup', word: 'Tutup', emoji: '🚪', level: 2 },
                 { id: 'v_pakai', word: 'Pakai', emoji: '👕', level: 2 },
                 { id: 'v_lepas', word: 'Lepas', emoji: '👟', level: 2 },
+                { id: 'v_pakai_baju', word: 'Pakai baju', emoji: '👕', level: 2 },
+                { id: 'v_lepas_baju', word: 'Lepas baju', emoji: '👕', level: 2 },
+                { id: 'v_pakai_celana', word: 'Pakai celana', emoji: '👖', level: 2 },
+                { id: 'v_lepas_celana', word: 'Lepas celana', emoji: '👖', level: 2 },
                 { id: 'v_duduk', word: 'Duduk', emoji: '🪑', level: 2 },
                 { id: 'v_berdiri', word: 'Berdiri', emoji: '🧍', level: 2 },
                 { id: 'v_jalan', word: 'Jalan', emoji: '🚶', level: 2 },
@@ -410,6 +425,9 @@
                 { id: 'v_gosok_gigi', word: 'Gosok gigi', emoji: '🦷', level: 2 },
                 { id: 'v_sisir', word: 'Sisir rambut', emoji: '💇', level: 2 },
                 { id: 'v_minum_susu', word: 'Minum susu', emoji: '🍼', level: 2 },
+                { id: 'v_lihat_tv', word: 'Lihat TV', emoji: '📺', level: 2 },
+                { id: 'v_bereskan_mainan', word: 'Bereskan mainan', emoji: '🧸', level: 2 },
+
                 // Level 3
                 { id: 'v_lari', word: 'Lari', emoji: '🏃', level: 3 },
                 { id: 'v_lompat', word: 'Lompat', emoji: '🦘', level: 3 },
@@ -430,16 +448,26 @@
                 { id: 'v_berenang', word: 'Berenang', emoji: '🏊', level: 3 },
                 { id: 'v_menyapu', word: 'Menyapu', emoji: '🧹', level: 3 },
                 { id: 'v_siram', word: 'Siram bunga', emoji: '🌱', level: 3 },
+                { id: 'v_main_teman', word: 'Bermain dengan teman', emoji: '🧑‍🤝‍🧑', level: 3 },
+                { id: 'v_belajar_sekolah', word: 'Belajar di sekolah', emoji: '🏫', level: 3 },
+                { id: 'v_pulang_sekolah', word: 'Pulang sekolah', emoji: '🎒', level: 3 },
+                { id: 'v_main_piano', word: 'Main piano', emoji: '🎹', level: 3 },
+                { id: 'v_main_angklung', word: 'Main angklung', emoji: '🎋', level: 3 },
+                { id: 'v_cuci_sepeda', word: 'Cuci sepeda', emoji: '🚲', level: 3 },
+                { id: 'v_main_kelereng', word: 'Bermain kelereng', emoji: '🎱', level: 3 },
+                { id: 'v_main_layang', word: 'Bermain layang-layang', emoji: '🪁', level: 3 },
+                { id: 'v_jalan_jalan', word: 'Jalan-jalan', emoji: '🚶', level: 3 },
+                { id: 'v_menanam', word: 'Menanam', emoji: '🌱', level: 3 },
+                { id: 'v_bersantai', word: 'Bersantai', emoji: '🛋️', level: 3 },
+                { id: 'v_buang_sampah', word: 'Buang sampah', emoji: '🗑️', level: 3 },
+                { id: 'v_beli_jajan', word: 'Beli jajan', emoji: '🍡', level: 3 },
+
                 // Level 4
                 { id: 'v_tunggu', word: 'Tunggu', emoji: '✋', level: 4 },
                 { id: 'v_bantu', word: 'Bantu', emoji: '🤝', level: 4 },
                 { id: 'v_belajar', word: 'Belajar', emoji: '📚', level: 4 },
                 { id: 'v_bicara', word: 'Bicara', emoji: '🗣️', level: 4 },
-                { id: 'v_bangun', word: 'Bangun tidur', emoji: '⏰', level: 4 },
                 { id: 'v_beres_tt', word: 'Bereskan tempat tidur', emoji: '🛏️', level: 4 },
-                { id: 'v_makan_pagi', word: 'Makan pagi', emoji: '🍳', level: 4 },
-                { id: 'v_makan_siang', word: 'Makan siang', emoji: '🍲', level: 4 },
-                { id: 'v_makan_malam', word: 'Makan malam', emoji: '🍛', level: 4 },
                 { id: 'v_cuci_baju', word: 'Cuci baju', emoji: '👕', level: 4 },
                 { id: 'v_cuci_piring', word: 'Cuci piring', emoji: '🍽️', level: 4 },
                 { id: 'v_jemur', word: 'Jemur baju', emoji: '🧺', level: 4 },
@@ -452,7 +480,44 @@
                 { id: 'v_bernyanyi', word: 'Bernyanyi', emoji: '🎤', level: 4 },
                 { id: 'v_bersepeda', word: 'Bersepeda', emoji: '🚲', level: 4 },
                 { id: 'v_baca_buku', word: 'Membaca buku cerita', emoji: '📚', level: 4 },
-                { id: 'v_mewarnai', word: 'Mewarnai', emoji: '🖍️', level: 4 }
+                { id: 'v_mewarnai', word: 'Mewarnai', emoji: '🖍️', level: 4 },
+                { id: 'v_petik_sayur', word: 'Petik sayur', emoji: '🥬', level: 4 },
+                { id: 'v_kupas_telur', word: 'Kupas telur rebus', emoji: '🥚', level: 4 },
+                { id: 'v_kupas_buah', word: 'Kupas kulit buah', emoji: '🍎', level: 4 },
+                { id: 'v_kancing_baju', word: 'Kancing baju', emoji: '🪡', level: 4 },
+                { id: 'v_lepas_kancing', word: 'Lepas kancing baju', emoji: '🪡', level: 4 },
+                { id: 'v_potong_buah', word: 'Potong buah', emoji: '🔪', level: 4 },
+                { id: 'v_potong_sayur', word: 'Potong sayur', emoji: '🔪', level: 4 },
+                { id: 'v_sikat_sepatu', word: 'Sikat sepatu', emoji: '👟', level: 4 },
+                { id: 'v_kupas_bawang', word: 'Kupas bawang', emoji: '🧅', level: 4 },
+                { id: 'v_potong_roti', word: 'Potong roti', emoji: '🥖', level: 4 },
+                { id: 'v_menata_baju', word: 'Menata baju', emoji: '👔', level: 4 },
+                { id: 'v_menulis', word: 'Menulis', emoji: '✍️', level: 4 },
+                { id: 'v_silat', word: 'Silat', emoji: '🥋', level: 4 },
+                { id: 'v_buat_tempe', word: 'Membuat tempe goreng', emoji: '🥠', level: 4 },
+                { id: 'v_buat_tahu', word: 'Membuat tahu goreng', emoji: '🧆', level: 4 },
+                { id: 'v_tata_meja', word: 'Menata meja makan', emoji: '🍽️', level: 4 },
+                { id: 'v_kasih_makan_hewan', word: 'Memberi makan hewan', emoji: '🐈', level: 4 },
+                { id: 'v_potong_rambut', word: 'Potong rambut', emoji: '✂️', level: 4 },
+                { id: 'v_potong_kuku', word: 'Potong kuku', emoji: '💅', level: 4 },
+                { id: 'v_pilah_sampah', word: 'Memilah sampah', emoji: '♻️', level: 4 },
+                { id: 'v_belajar_kelompok', word: 'Belajar kelompok', emoji: '👥', level: 4 },
+                { id: 'v_buat_jelly', word: 'Membuat jelly', emoji: '🍮', level: 4 },
+                { id: 'v_buat_nasgor', word: 'Membuat nasi goreng', emoji: '🍛', level: 4 },
+                { id: 'v_beli_bensin', word: 'Beli bensin', emoji: '⛽', level: 4 },
+                { id: 'v_buat_telur_rebus', word: 'Membuat telur rebus', emoji: '🥚', level: 4 },
+                { id: 'v_hafal_doa', word: 'Menghafal doa sehari-hari', emoji: '🤲', level: 4 },
+                { id: 'v_kerja_bakti', word: 'Kerja bakti', emoji: '🧹', level: 4 },
+                { id: 'v_bersih_kaca', word: 'Membersihkan kaca', emoji: '🪟', level: 4 },
+                { id: 'v_buat_jus', word: 'Membuat jus', emoji: '🍹', level: 4 },
+                { id: 'v_buat_roti_bakar', word: 'Membuat roti bakar', emoji: '🥪', level: 4 },
+                { id: 'v_buat_telur_goreng', word: 'Membuat telur goreng', emoji: '🍳', level: 4 },
+                { id: 'v_buat_susu', word: 'Membuat susu', emoji: '🥛', level: 4 },
+                { id: 'v_buat_mie', word: 'Membuat mie goreng', emoji: '🍜', level: 4 },
+                { id: 'v_buat_teh', word: 'Membuat teh', emoji: '🍵', level: 4 },
+                { id: 'v_buat_kopi', word: 'Membuat kopi', emoji: '☕', level: 4 },
+                { id: 'v_cuci_sayur', word: 'Cuci sayur', emoji: '🥬', level: 4 },
+                { id: 'v_siapkan_sekolah', word: 'Menyiapkan keperluan sekolah', emoji: '🎒', level: 4 }
             ],
             benda: [
                 // Benda umum & turunan kata kerja
@@ -470,6 +535,7 @@
                 { id: 'n_mobilmainan', word: 'Mobilan', emoji: '🚗', level: 1 },
                 { id: 'n_tv', word: 'Televisi', emoji: '📺', level: 1 },
                 { id: 'n_hp', word: 'Handphone', emoji: '📱', level: 1 },
+
                 // Makanan berat & lauk pauk tambahan
                 { id: 'n_telur_goreng', word: 'Telur goreng', emoji: '🍳', level: 1 },
                 { id: 'n_telur_rebus', word: 'Telur rebus', emoji: '🥚', level: 1 },
@@ -488,6 +554,13 @@
                 { id: 'n_bakso', word: 'Bakso', emoji: '🧆', level: 1 },
                 { id: 'n_sosis', word: 'Sosis', emoji: '🌭', level: 1 },
                 { id: 'n_keju', word: 'Keju', emoji: '🧀', level: 1 },
+                { id: 'n_nugget', word: 'Nugget', emoji: '🌭', level: 1 },
+                { id: 'n_pizza', word: 'Pizza', emoji: '🍕', level: 1 },
+                { id: 'n_burger', word: 'Burger', emoji: '🍔', level: 1 },
+                { id: 'n_kerupuk', word: 'Kerupuk', emoji: '🍘', level: 1 },
+                { id: 'n_cokelat', word: 'Cokelat', emoji: '🍫', level: 1 },
+                { id: 'n_kue', word: 'Kue', emoji: '🍰', level: 1 },
+
                 // Benda turunan aksi (Tutup botol, tutup pintu, potong buah, dll)
                 { id: 'n_tutup_botol', word: 'Tutup botol', emoji: '🍼', level: 2 },
                 { id: 'n_tutup_pintu', word: 'Pintu', emoji: '🚪', level: 2 },
@@ -500,9 +573,27 @@
                 { id: 'n_gelas', word: 'Gelas', emoji: '🥛', level: 2 },
                 { id: 'n_sendok', word: 'Sendok', emoji: '🥄', level: 2 },
                 { id: 'n_botol', word: 'Botol', emoji: '🏺', level: 2 },
+                { id: 'n_kancing', word: 'Kancing', emoji: '🪡', level: 2 },
+                { id: 'n_jus', word: 'Jus', emoji: '🍹', level: 2 },
+                { id: 'n_roti_bakar', word: 'Roti bakar', emoji: '🥪', level: 2 },
+                { id: 'n_teh', word: 'Teh', emoji: '🍵', level: 2 },
+                { id: 'n_kopi', word: 'Kopi', emoji: '☕', level: 2 },
+                
                 { id: 'n_tas', word: 'Tas', emoji: '🎒', level: 3 },
                 { id: 'n_sepeda', word: 'Sepeda', emoji: '🚲', level: 3 },
                 { id: 'n_sabun', word: 'Sabun', emoji: '🧼', level: 3 },
+                { id: 'n_bawang', word: 'Bawang', emoji: '🧅', level: 3 },
+                { id: 'n_kuku', word: 'Kuku', emoji: '💅', level: 3 },
+                { id: 'n_rambut', word: 'Rambut', emoji: '💇', level: 3 },
+                { id: 'n_sampah', word: 'Sampah', emoji: '🗑️', level: 3 },
+                { id: 'n_kaca', word: 'Kaca', emoji: '🪟', level: 3 },
+                { id: 'n_jelly', word: 'Jelly', emoji: '🍮', level: 3 },
+                { id: 'n_bensin', word: 'Bensin', emoji: '⛽', level: 3 },
+                { id: 'n_keperluan_sekolah', word: 'Keperluan sekolah', emoji: '🎒', level: 3 },
+                { id: 'n_kelereng', word: 'Kelereng', emoji: '🎱', level: 3 },
+                { id: 'n_layang', word: 'Layang-layang', emoji: '🪁', level: 3 },
+                { id: 'n_piano', word: 'Piano', emoji: '🎹', level: 3 },
+                { id: 'n_angklung', word: 'Angklung', emoji: '🎋', level: 3 },
                 { id: 'n_uang', word: 'Uang', emoji: '💵', level: 4 },
                 { id: 'n_obat', word: 'Obat', emoji: '💊', level: 4 }
             ],
@@ -526,7 +617,7 @@
                 { id: 'p_dapur', word: 'di Dapur', emoji: '🍳', level: 2 },
                 { id: 'p_kmandi', word: 'di Kamar Mandi', emoji: '🚿', level: 2 },
                 { id: 'p_sekolah', word: 'di Sekolah', emoji: '🏫', level: 3 },
-                { id: 'p_taman', word: 'di Taman', emoji: '🏞️', level: 3 },
+                { id: 'p_taman', word: 'pergi ke Taman', emoji: '🏞️', level: 3 },
                 { id: 'p_playground', word: 'pergi ke Playground', emoji: '🎡', level: 3 },
                 { id: 'p_pantai', word: 'pergi ke Pantai', emoji: '🏖️', level: 3 },
                 { id: 'p_mobil', word: 'di Mobil', emoji: '🚗', level: 3 },
