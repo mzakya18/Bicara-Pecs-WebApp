@@ -1,1 +1,1 @@
-// Database kata kerja
+const kataKerja = [];
