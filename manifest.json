@@ -1,11 +1,10 @@
 {
-  "name": "Bicara Pecs by @zakymza",
-  "short_name": "Bicara Pecs",
-  "description": "Aplikasi Komunikasi AAC untuk anak non-verbal. Dibuat oleh @zakymza",
+  "name": "Bicara PECS WebApp v2",
+  "short_name": "Bicara",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f0f4f8",
-  "theme_color": "#3b82f6",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
   "icons": [
     {
       "src": "icon-192.png",
