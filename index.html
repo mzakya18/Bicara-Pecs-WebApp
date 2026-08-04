@@ -362,17 +362,22 @@
         let sentence = [];
         let isEditMode = false;
         
-        let appConfig = JSON.parse(localStorage.getItem('aac_config_v3')) || {
-            setupDone: false,
-            ageLevel: 1,
-            gender: 'L',
-            hiddenCards: []
-        };
+        let appConfig;
+        try {
+            appConfig = JSON.parse(localStorage.getItem('aac_config_v3')) || {
+                setupDone: false,
+                ageLevel: 1,
+                gender: 'L',
+                hiddenCards: []
+            };
+        } catch (error) {
+            appConfig = { setupDone: false, ageLevel: 1, gender: 'L', hiddenCards: [] };
+        }
 
         window.onload = () => {
             if (appConfig.setupDone) {
                 const radio = document.querySelector(`input[name="level"][value="${appConfig.ageLevel}"]`);
-                if(radio) radio.checked = true;
+                if (radio) radio.checked = true;
                 document.getElementById('select-gender').value = appConfig.gender;
                 goToPage('page-main');
                 renderApp();
@@ -388,6 +393,7 @@
             document.getElementById('sidebar').classList.add('open');
             document.getElementById('overlay').style.display = 'block';
         }
+        
         function closeMenu() {
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('overlay').style.display = 'none';
@@ -405,7 +411,6 @@
 
         function toggleEditMode() {
             if (!isEditMode) {
-                // Sembunyikan prompt angka sandi agar hanya pemilik yang tahu (18)
                 const pin = prompt("Masukkan kode sandi:");
                 if (pin === "18") {
                     isEditMode = true;
@@ -548,26 +553,28 @@
             }
         }
 
-        function removeWord(index) { sentence.splice(index, 1); updateStrip(); }
-        function clearSentence() { sentence = []; updateStrip(); }
+        function removeWord(index) { 
+            sentence.splice(index, 1); 
+            updateStrip(); 
+        }
+        
+        function clearSentence() { 
+            sentence = []; 
+            updateStrip(); 
+        }
 
-        // Konfigurasi Suara (Optimasi Bahasa Indonesia Alami)
         function speakSentence() {
             if (sentence.length === 0) return;
             const textToSpeak = sentence.map(item => item.word).join(' ');
             
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Hentikan suara sebelumnya
+                window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 
-                // Paksa menggunakan bahasa Indonesia
                 utterance.lang = 'id-ID';
-                
-                // Atur intonasi agar lebih lambat dan jelas untuk anak
                 utterance.rate = 0.85; 
                 utterance.pitch = appConfig.gender === 'L' ? 0.9 : 1.3;
 
-                // Coba temukan Voice Google/Lokal id-ID jika tersedia
                 let voices = window.speechSynthesis.getVoices();
                 let indonesianVoice = voices.find(voice => voice.lang === 'id-ID' || voice.lang === 'id_ID');
                 if (indonesianVoice) {
@@ -580,7 +587,6 @@
             }
         }
 
-        // Panggil getVoices agar termuat di Chrome Android
         if ('speechSynthesis' in window) {
             window.speechSynthesis.onvoiceschanged = function() {
                 window.speechSynthesis.getVoices();
@@ -589,5 +595,6 @@
     </script>
 </body>
 </html>
+
 
 
