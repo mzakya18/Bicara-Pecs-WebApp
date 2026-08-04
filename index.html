@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web App AAC Interaktif</title>
-    <!-- Ganti href dengan file style.css Anda yang sudah ada -->
     <link rel="stylesheet" href="style.css">
     
-    <!-- Inline style sederhana khusus untuk modal & toggle mata -->
     <style>
-        /* Sembunyikan menu secara default, script.js yang akan mengatur tampilannya */
         .menu-section { display: none; padding: 20px; }
         
-        /* Modal Tambah Kata */
         #modal-tambah-kata {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
@@ -23,41 +19,36 @@
         }
         #preview-gambar { max-width: 100%; margin-top: 10px; border-radius: 4px; }
         
-        /* Gaya Tombol Mata Edit */
         .btn-mata {
-            display: none; /* Disembunyikan sampai mode edit aktif */
+            display: none; 
             position: absolute; top: 5px; right: 5px;
             background: rgba(255, 255, 255, 0.8); border: none;
             border-radius: 50%; padding: 5px; cursor: pointer;
             font-size: 16px;
         }
-        /* Penyesuaian Kartu untuk menampung tombol mata (position absolute) */
         .kartu-kata { position: relative; } 
     </style>
 </head>
 <body>
 
-    <!-- ========================================== -->
-    <!-- MENU 1: DISCLAIMER                         -->
-    <!-- ========================================== -->
+    <!-- MENU 1: DISCLAIMER -->
     <div id="menu-disclaimer" class="menu-section">
         <h2>Perhatian (Disclaimer)</h2>
         <p>Aplikasi ini aman digunakan dan dirancang sebagai alat bantu komunikasi (AAC). Aplikasi ini bukan pengganti terapi medis atau penilaian klinis profesional.</p>
         <button onclick="bukaMenu('menu-level')">Lanjut ke Pengaturan Level</button>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- MENU 2: PENGATURAN LEVEL                   -->
-    <!-- ========================================== -->
+    <!-- MENU 2: PENGATURAN LEVEL -->
     <div id="menu-level" class="menu-section">
         <h2>Pengaturan Level Kemampuan Anak</h2>
         <p>Pilih level yang sesuai untuk menyesuaikan jumlah dan kerumitan kosakata yang ditampilkan.</p>
-        <select id="pilihan-level">
+        
+        <!-- BAGIAN YANG DIREVISI: Tambah onchange="renderSemuaKategori()" -->
+        <select id="pilihan-level" onchange="renderSemuaKategori()">
             <option value="1">Level 1 (Dasar - Kebutuhan Harian)</option>
             <option value="2">Level 2 (Menengah - Rutinitas & Bermain)</option>
             <option value="3">Level 3 (Lanjutan - Spesifik & Kompleks)</option>
-            <option value="semua">Tampilkan Semua Level</option>
+            <option value="semua" selected>Tampilkan Semua Level</option>
         </select>
         
         <br><br>
@@ -68,14 +59,10 @@
         
         <br><br>
         <button onclick="bukaMenu('menu-guide')">Lanjut ke Panduan Singkat</button>
-        <!-- Tombol langsung ke papan utama jika pengguna sudah paham -->
         <button onclick="bukaMenu('menu-utama')" style="background-color: #ddd; color: black;">Langsung ke Papan Utama</button>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- MENU 3: QUICK GUIDE                        -->
-    <!-- ========================================== -->
+    <!-- MENU 3: QUICK GUIDE -->
     <div id="menu-guide" class="menu-section">
         <h2>Panduan Penggunaan (Quick Guide)</h2>
         <ol>
@@ -87,29 +74,24 @@
         <button onclick="bukaMenu('menu-utama')">Mulai Gunakan Papan AAC</button>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- MENU 4: PAPAN UTAMA (INTI APLIKASI)        -->
-    <!-- ========================================== -->
+    <!-- MENU 4: PAPAN UTAMA -->
     <div id="menu-utama" class="menu-section">
         <button onclick="bukaMenu('menu-level')">⚙️ Kembali ke Pengaturan</button>
         
         <!-- Display Box & Tombol Suara -->
         <div id="display-kalimat-area" style="margin: 20px 0; padding: 10px; border: 2px solid #ccc; border-radius: 8px; min-height: 50px;">
-            <h3 id="display-kalimat">...</h3> <!-- Teks kalimat akan muncul di sini -->
+            <h3 id="display-kalimat">...</h3> 
             <button onclick="bunyikanKalimatSekarang()">🔊 Bicara</button>
             <button onclick="hapusKalimat()">❌ Hapus</button>
         </div>
 
-        <!-- Tombol Tampilkan/Sembunyikan (Mode Edit) -->
+        <!-- Tombol Edit (Tampil/Sembunyi) -->
         <button id="btn-toggle-edit" onclick="toggleModeEdit()" style="margin-bottom: 20px; background-color: #ff9800;">👁️‍🗨️ Tampilkan / Sembunyikan Kata</button>
 
-        <!-- Area Kategori Kosakata (Contoh struktur untuk Kata Kerja) -->
+        <!-- Area Kategori -->
         <div class="kategori-container">
             <h3>Kata Kerja <button onclick="bukaModalTambah('Kata Kerja')" title="Tambah Kata Kerja Baru">+</button></h3>
-            <div id="grid-kata-kerja" class="grid-kosakata">
-                <!-- Data dari script.js & database.js akan di-render (ditampilkan) ke dalam div ini -->
-            </div>
+            <div id="grid-kata-kerja" class="grid-kosakata"></div>
         </div>
         
         <div class="kategori-container">
@@ -132,22 +114,17 @@
             <div id="grid-waktu" class="grid-kosakata"></div>
         </div>
 
-        <!-- Riwayat 24 Jam -->
+        <!-- Riwayat -->
         <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px;">
             <h3>🕒 Riwayat Kalimat Hari Ini</h3>
-            <ul id="daftar-riwayat">
-                <!-- Riwayat kalimat akan muncul di sini -->
-            </ul>
+            <ul id="daftar-riwayat"></ul>
         </div>
 
         <br>
         <button onclick="bukaMenu('menu-referensi')">Lihat Referensi</button>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- MENU 5: REFERENSI                          -->
-    <!-- ========================================== -->
+    <!-- MENU 5: REFERENSI -->
     <div id="menu-referensi" class="menu-section">
         <h2>Referensi Klinis</h2>
         <p>Aplikasi ini disusun berdasarkan:</p>
@@ -159,20 +136,14 @@
         <button onclick="bukaMenu('menu-utama')">Kembali ke Papan Utama</button>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- MENU 6: TENTANG APLIKASI                   -->
-    <!-- ========================================== -->
+    <!-- MENU 6: TENTANG APLIKASI -->
     <div id="menu-tentang" class="menu-section">
         <h2>Tentang Aplikasi</h2>
         <p>Web App AAC ini dirancang khusus untuk mendukung komunikasi anak berkebutuhan khusus, dapat bekerja secara offline, dan menyesuaikan perkembangan bahasa anak.</p>
         <button onclick="bukaMenu('menu-utama')">Kembali ke Papan Utama</button>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- MODAL (POP-UP) TAMBAH KATA MANUAL          -->
-    <!-- ========================================== -->
+    <!-- MODAL TAMBAH KATA -->
     <div id="modal-tambah-kata">
         <div class="modal-content">
             <h3>Tambah Kosakata Baru</h3>
@@ -190,20 +161,15 @@
         </div>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- PEMANGGILAN JAVASCRIPT                     -->
-    <!-- ========================================== -->
+    <!-- PEMANGGILAN SCRIPT -->
     <script src="database.js"></script>
     <script src="custom-data.js"></script>
     <script src="script.js"></script>
 
-    <!-- SCRIPT TAMBAHAN (RENDER GRID & KALIMAT) -->
-    <!-- Bagian ini khusus untuk menghubungkan UI html dengan logika di script.js -->
+    <!-- SCRIPT TAMBAHAN -->
     <script>
         let kalimatSaatIni = "";
 
-        // Menambahkan kata ke display kalimat
         function tambahKataKeKalimat(kata) {
             if (kalimatSaatIni !== "") {
                 kalimatSaatIni += " ";
@@ -212,22 +178,16 @@
             document.getElementById('display-kalimat').innerText = kalimatSaatIni;
         }
 
-        // Membunyikan kalimat di display
         function bunyikanKalimatSekarang() {
             if (kalimatSaatIni.trim() !== "") {
                 bicara(kalimatSaatIni);
             }
         }
 
-        // Menghapus kalimat di display
         function hapusKalimat() {
             kalimatSaatIni = "";
             document.getElementById('display-kalimat').innerText = "...";
         }
-        
-        // Fungsi simulasi render grid (untuk Anda kembangkan lebih lanjut di script.js jika ingin render dinamis)
-        // Saat ini, script.js Anda sudah memiliki kerangka logika, Anda bisa memanggil data dari 
-        // databaseKosakata (di database.js) dan menampilkannya menggunakan loop ke dalam div id="grid-kata-kerja" dsb.
     </script>
 
 </body>
