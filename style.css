@@ -64,3 +64,82 @@ body { font-family: sans-serif; background: var(--bg); color: var(--text); }
 .modal.hidden { display: none; }
 .modal-content { background: var(--card-bg); padding: 20px; border-radius: 8px; width: 300px; display: flex; flex-direction: column; gap: 15px; }
 .modal-content input, .modal-content select { padding: 8px; border: 1px solid var(--border); border-radius: 4px; }
+/* =========================================
+   RESPONSIVE DESIGN UNTUK HP (MOBILE)
+   ========================================= */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        padding: 10px 15px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar h2 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    /* Ubah menu samping jadi menu geser horizontal di atas */
+    .sidebar ul {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 5px;
+    }
+
+    .sidebar ul::-webkit-scrollbar {
+        height: 4px;
+    }
+    .sidebar ul::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+    }
+
+    .sidebar ul li a {
+        white-space: nowrap;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    .theme-switch {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Rapikan area susun kalimat dan tombol bicara */
+    .sentence-builder {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .board-actions {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .board-actions button {
+        flex: 1;
+        margin-left: 0;
+        margin-right: 5px;
+        padding: 12px;
+    }
+
+    .board-actions button.btn-clear {
+        margin-right: 0;
+        margin-left: 5px;
+    }
+    
+    .cards-container {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 10px;
+    }
+}
