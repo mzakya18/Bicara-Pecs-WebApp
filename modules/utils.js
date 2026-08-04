@@ -1,1 +1,1 @@
-
+// Fungsi umum
