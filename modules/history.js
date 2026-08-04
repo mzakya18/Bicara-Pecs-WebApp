@@ -1,1 +1,1 @@
-
+// Riwayat kalimat
