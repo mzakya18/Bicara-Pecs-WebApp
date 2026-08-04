@@ -212,3 +212,10 @@ init();
 import { kataBendaDb } from './database/kata-benda.js';
 // Lalu gabungkan ke ALL_DB:
 // const ALL_DB = [...kataKerjaDb, ...kataBendaDb]; 
+import { kataKerjaDb } from './database/kata-kerja.js';
+import { kataBendaDb } from './database/kata-benda.js';
+import { tempatDb } from './database/tempat.js';
+import { waktuDb } from './database/waktu.js';
+
+const ALL_DB = [...kataKerjaDb, ...kataBendaDb, ...tempatDb, ...waktuDb];
+const CATEGORIES = ['kata-kerja', 'kata-benda', 'makanan', 'tempat', 'waktu'];
