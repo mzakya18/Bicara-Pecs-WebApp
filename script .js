@@ -1,42 +1,28 @@
 // ==========================================
-// 1. LOGIKA NAVIGASI 6 MENU
+// 1. LOGIKA NAVIGASI MENU & TEMA
 // ==========================================
-
-// Fungsi untuk berpindah menu
 function bukaMenu(idMenu) {
-    // Daftar ID menu sesuai urutan instruksi
-    const daftarMenu = [
-        'menu-disclaimer', 
-        'menu-level', 
-        'menu-guide', 
-        'menu-utama', 
-        'menu-referensi', 
-        'menu-tentang'
-    ];
-
-    // Sembunyikan semua menu terlebih dahulu
+    const daftarMenu = ['menu-disclaimer', 'menu-level', 'menu-guide', 'menu-utama', 'menu-referensi', 'menu-tentang'];
+    
+    // Sembunyikan semua
     daftarMenu.forEach(menu => {
         const elemen = document.getElementById(menu);
-        if (elemen) {
-            elemen.style.display = 'none';
-        }
+        if (elemen) elemen.style.display = 'none';
     });
 
-    // Tampilkan hanya menu yang dipanggil
+    // Tampilkan yang dipilih
     const menuAktif = document.getElementById(idMenu);
     if (menuAktif) {
         menuAktif.style.display = 'block';
+        // Jika membuka menu utama, render (tampilkan) kosakata
+        if(idMenu === 'menu-utama') {
+            renderSemuaKategori();
+        }
     }
 }
 
-
-// ==========================================
-// 2. LOGIKA TEMA (GELAP / TERANG / SISTEM)
-// ==========================================
-
 function ubahTema(pilihan) {
-    const html = document.documentElement; // Menargetkan tag <html>
-
+    const html = document.documentElement;
     if (pilihan === 'gelap') {
         html.setAttribute('data-theme', 'dark');
         localStorage.setItem('aac_tema', 'gelap');
@@ -44,218 +30,240 @@ function ubahTema(pilihan) {
         html.setAttribute('data-theme', 'light');
         localStorage.setItem('aac_tema', 'terang');
     } else {
-        // Mode Sistem
         html.removeAttribute('data-theme');
         localStorage.setItem('aac_tema', 'sistem');
     }
 }
 
 function inisialisasiTema() {
-    // Ambil preferensi tema sebelumnya, default ke 'sistem' jika belum ada
     const temaTersimpan = localStorage.getItem('aac_tema') || 'sistem';
     ubahTema(temaTersimpan);
-
-    // Deteksi otomatis jika sistem HP user berubah tema (dari terang ke gelap atau sebaliknya)
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        if (localStorage.getItem('aac_tema') === 'sistem') {
-            ubahTema('sistem');
-        }
-    });
 }
 
-
 // ==========================================
-// 3. INISIALISASI SAAT APLIKASI DIBUKA
+// 2. TEXT TO SPEECH & RIWAYAT
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    // Tampilkan menu pertama saat web dibuka
-    bukaMenu('menu-disclaimer');
-    
-    // Terapkan tema
-    inisialisasiTema();
-});
-
-// ==========================================
-// 4. TEXT-TO-SPEECH (TTS)
-// ==========================================
-
 function bicara(teks) {
-    // Mengecek apakah browser mendukung fitur suara
     if ('speechSynthesis' in window) {
         const ucapan = new SpeechSynthesisUtterance(teks);
-        ucapan.lang = 'id-ID'; // Menggunakan suara Bahasa Indonesia
-        
-        // Membatalkan suara yang sedang berjalan agar tidak bertumpuk jika anak memencet berulang kali
-        window.speechSynthesis.cancel(); 
-        
+        ucapan.lang = 'id-ID';
+        window.speechSynthesis.cancel();
         window.speechSynthesis.speak(ucapan);
-        
-        // Setelah diucapkan, simpan ke riwayat
         tambahKeRiwayat(teks);
     } else {
-        alert("Maaf, browser/perangkat Anda tidak mendukung fitur suara.");
+        alert("Browser tidak mendukung fitur suara.");
     }
 }
 
-
-// ==========================================
-// 5. LOGIKA RIWAYAT 24 JAM & RESET OTOMATIS
-// ==========================================
-
 function tambahKeRiwayat(kalimat) {
-    cekResetRiwayat(); // Selalu cek apakah sudah jam 12 malam sebelum menambah riwayat
-
+    cekResetRiwayat();
     let riwayat = JSON.parse(localStorage.getItem('aac_riwayat')) || [];
-    let waktuSekarang = new Date().getTime();
-    
-    riwayat.push({ kalimat: kalimat, waktu: waktuSekarang });
+    riwayat.push({ kalimat: kalimat, waktu: new Date().getTime() });
     localStorage.setItem('aac_riwayat', JSON.stringify(riwayat));
+    renderRiwayat();
 }
 
 function cekResetRiwayat() {
     let tanggalResetTerakhir = localStorage.getItem('aac_terakhir_reset');
-    
-    // Mengambil tanggal hari ini (berubah otomatis saat lewat jam 00:00)
     let tanggalHariIni = new Date().toLocaleDateString();
 
     if (tanggalResetTerakhir !== tanggalHariIni) {
-        // Jika tanggal berbeda (sudah ganti hari), hapus riwayat
         localStorage.removeItem('aac_riwayat');
         localStorage.setItem('aac_terakhir_reset', tanggalHariIni);
     }
 }
 
-// Menjalankan pengecekan reset saat aplikasi pertama kali dibuka
-document.addEventListener('DOMContentLoaded', () => {
-    cekResetRiwayat();
-});
+function renderRiwayat() {
+    const ulRiwayat = document.getElementById('daftar-riwayat');
+    if (!ulRiwayat) return;
+    
+    let riwayat = JSON.parse(localStorage.getItem('aac_riwayat')) || [];
+    ulRiwayat.innerHTML = '';
+    
+    // Tampilkan 10 riwayat terakhir
+    riwayat.slice(-10).forEach(item => {
+        let li = document.createElement('li');
+        li.innerText = item.kalimat;
+        ulRiwayat.appendChild(li);
+    });
+}
 
 // ==========================================
-// 6. LOGIKA TAMBAH KATA MANUAL (TOMBOL +)
+// 3. TAMBAH KATA MANUAL
 // ==========================================
-
-// Fungsi membuka jendela mini (modal)
 function bukaModalTambah(kategori) {
     const modal = document.getElementById('modal-tambah-kata');
     if (modal) {
-        // Simpan info kategori mana yang sedang ditambahkan
         document.getElementById('input-kategori-target').value = kategori;
         modal.style.display = 'block';
     }
 }
 
-// Fungsi menutup jendela mini
 function tutupModalTambah() {
     const modal = document.getElementById('modal-tambah-kata');
     if (modal) {
         modal.style.display = 'none';
-        // Bersihkan input setelah ditutup
         document.getElementById('input-kata-baru').value = '';
         document.getElementById('input-gambar-baru').value = '';
         document.getElementById('preview-gambar').src = '';
     }
 }
 
-// Fungsi memproses gambar yang diunggah agar bisa disimpan offline
 function prosesPreviewGambar(event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            // Tampilkan gambar di elemen preview (sekaligus menyimpan kode gambarnya)
             document.getElementById('preview-gambar').src = e.target.result;
         }
-        reader.readAsDataURL(file); // Ubah gambar ke teks Base64
+        reader.readAsDataURL(file);
     }
 }
 
-// Fungsi menyimpan kata ke dalam custom data
 function simpanKataBaru() {
     const kategori = document.getElementById('input-kategori-target').value;
     const kataBaru = document.getElementById('input-kata-baru').value.trim();
     const gambarBase64 = document.getElementById('preview-gambar').src;
 
-    // Validasi data kosong
-    if (!kataBaru || !gambarBase64 || gambarBase64.endsWith('')) {
-        alert("Mohon isi kata dan masukkan gambar terlebih dahulu.");
+    if (!kataBaru) {
+        alert("Mohon isi kata terlebih dahulu.");
         return;
     }
 
-    // Konfirmasi ulang sesuai instruksi
-    const yakin = confirm(`Konfirmasi: Tambahkan kata "${kataBaru}" beserta gambarnya?`);
-    
+    const yakin = confirm(`Tambahkan kata "${kataBaru}"?`);
     if (yakin) {
-        let dataCustom = JSON.parse(localStorage.getItem('aac_custom_data')) || {};
-        
-        if (!dataCustom[kategori]) {
-            dataCustom[kategori] = [];
+        // Asumsi fungsi ini ada di custom-data.js
+        if(typeof simpanKataCustom === 'function') {
+            simpanKataCustom(kategori, kataBaru, gambarBase64);
         }
-
-        dataCustom[kategori].push({
-            kata: kataBaru,
-            gambar: gambarBase64,
-            isSembunyi: false // Default terlihat (tidak disembunyikan)
-        });
-
-        localStorage.setItem('aac_custom_data', JSON.stringify(dataCustom));
-        
-        alert("Kosakata baru berhasil ditambahkan! Suara sudah otomatis berfungsi.");
+        alert("Berhasil!");
         tutupModalTambah();
-        
-        // Panggil fungsi render ulang papan agar kata baru langsung muncul (akan kita buat nanti)
-        // renderKategori(kategori);
+        renderSemuaKategori(); // Refresh tampilan papan
     }
 }
 
 // ==========================================
-// 7. LOGIKA TAMPILKAN/SEMBUNYIKAN (TOMBOL MATA)
+// 4. MODE TAMPIL/SEMBUNYI (MATA)
 // ==========================================
-
 let modeEditAktif = false;
 
-// Fungsi untuk masuk ke mode "Atur Kata"
 function toggleModeEdit() {
     modeEditAktif = !modeEditAktif;
-    
-    // Munculkan atau sembunyikan semua tombol mata pada setiap kartu kata
-    const semuaTombolMata = document.querySelectorAll('.btn-mata');
-    semuaTombolMata.forEach(tombol => {
-        tombol.style.display = modeEditAktif ? 'block' : 'none';
-    });
-
-    // Ubah teks tombol utama
     const btnToggleEdit = document.getElementById('btn-toggle-edit');
     if (btnToggleEdit) {
-        btnToggleEdit.innerText = modeEditAktif ? 'Selesai Mengatur' : 'Tampilkan / Sembunyikan Kata';
+        btnToggleEdit.innerText = modeEditAktif ? '✅ Selesai Mengatur' : '👁️‍🗨️ Tampilkan / Sembunyikan Kata';
     }
+    renderSemuaKategori(); // Refresh papan untuk memunculkan tombol mata
 }
 
-// Fungsi saat tombol mata di klik pada suatu kata
-function toggleSembunyiKata(kata, idElemenIkon, idKartu) {
+function toggleSembunyiKata(kata) {
     let kataTersembunyi = JSON.parse(localStorage.getItem('aac_kata_tersembunyi')) || [];
     const index = kataTersembunyi.indexOf(kata);
     
-    const ikonMata = document.getElementById(idElemenIkon);
-    const kartuKata = document.getElementById(idKartu);
-
     if (index > -1) {
-        // Kata sudah disembunyikan -> Tampilkan kembali
-        kataTersembunyi.splice(index, 1);
-        if (ikonMata) ikonMata.innerText = '👁️'; // Ganti dengan gambar mata terbuka nanti di HTML/CSS
-        if (kartuKata) kartuKata.style.opacity = '1'; // Visual kembali normal saat mode edit
+        kataTersembunyi.splice(index, 1); // Munculkan
     } else {
-        // Kata belum disembunyikan -> Sembunyikan
-        kataTersembunyi.push(kata);
-        if (ikonMata) ikonMata.innerText = '👁️‍🗨️'; // Ganti dengan gambar mata dicoret
-        if (kartuKata) kartuKata.style.opacity = '0.5'; // Visual meredup saat mode edit sebagai penanda
+        kataTersembunyi.push(kata); // Sembunyikan
     }
-
-    // Simpan perubahan ke memori HP/Laptop
     localStorage.setItem('aac_kata_tersembunyi', JSON.stringify(kataTersembunyi));
+    renderSemuaKategori(); // Refresh tampilan
 }
 
-// Fungsi ini akan dipakai saat memuat daftar kata dari database.js
 function cekKataTersembunyi(kata) {
     let kataTersembunyi = JSON.parse(localStorage.getItem('aac_kata_tersembunyi')) || [];
     return kataTersembunyi.includes(kata);
 }
+
+
+// ==========================================
+// 5. RENDER (MEMUNCULKAN TOMBOL KE LAYAR)
+// ==========================================
+function renderSemuaKategori() {
+    // Pastikan databaseKosakata dari database.js terbaca
+    if (typeof databaseKosakata === 'undefined') {
+        console.error("database.js belum dimuat atau ada error di dalamnya.");
+        return;
+    }
+
+    const levelDipilih = document.getElementById('pilihan-level') ? document.getElementById('pilihan-level').value : 'semua';
+    
+    const pemetaanGrid = {
+        "Kata Kerja": "grid-kata-kerja",
+        "Kata Benda": "grid-kata-benda",
+        "Makanan": "grid-makanan",
+        "Tempat": "grid-tempat",
+        "Waktu": "grid-waktu"
+    };
+
+    for (const kategori in pemetaanGrid) {
+        const divGrid = document.getElementById(pemetaanGrid[kategori]);
+        if (!divGrid) continue;
+        
+        divGrid.innerHTML = ''; // Bersihkan isi lama
+
+        // 1. Render data bawaan dari database.js
+        let daftarKata = databaseKosakata[kategori] || [];
+        daftarKata.forEach(item => {
+            // Filter level
+            if (levelDipilih !== 'semua' && item.level > parseInt(levelDipilih)) return;
+            buatTombolKata(item.kata, divGrid);
+        });
+
+        // 2. Render data custom (bila fungsi ambilKataCustom tersedia)
+        if(typeof ambilKataCustom === 'function') {
+            let dataCustomSemua = ambilKataCustom();
+            // Struktur dataCustom misalnya: [ {kategori: "Makanan", kata: "Pisang"}, ... ]
+            if(dataCustomSemua && dataCustomSemua.length > 0) {
+                dataCustomSemua.forEach(customItem => {
+                    if(customItem.kategori === kategori) {
+                        buatTombolKata(customItem.kata, divGrid, true); // true = custom
+                    }
+                });
+            }
+        }
+    }
+}
+
+function buatTombolKata(kata, containerElement, isCustom = false) {
+    const disembunyikan = cekKataTersembunyi(kata);
+    
+    // Jika kata disembunyikan DAN sedang tidak dalam mode edit, jangan tampilkan sama sekali
+    if (disembunyikan && !modeEditAktif) return;
+
+    // Buat bungkus kartu
+    const divKartu = document.createElement('div');
+    divKartu.className = 'kartu-kata';
+    // Meredupkan tombol jika statusnya disembunyikan
+    divKartu.style.opacity = disembunyikan ? '0.3' : '1'; 
+    divKartu.style.display = 'inline-block';
+    divKartu.style.margin = '5px';
+    divKartu.style.position = 'relative';
+
+    // Buat tombol kata utama
+    const btnKata = document.createElement('button');
+    btnKata.innerText = kata;
+    btnKata.style.padding = '10px 15px';
+    if(isCustom) btnKata.style.border = '2px solid green'; // Penanda kata custom
+    
+    btnKata.onclick = () => {
+        // Jika sedang mode edit, klik tombol = menyembunyikan/menampilkan
+        if (modeEditAktif) {
+            toggleSembunyiKata(kata);
+        } else {
+            // Jika normal, klik = masuk ke kalimat
+            if(typeof tambahKataKeKalimat === 'function') tambahKataKeKalimat(kata);
+        }
+    };
+
+    divKartu.appendChild(btnKata);
+    containerElement.appendChild(divKartu);
+}
+
+// ==========================================
+// 6. INISIALISASI AWAL
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    cekResetRiwayat();
+    inisialisasiTema();
+    bukaMenu('menu-disclaimer'); // Ini yang menghilangkan layar putih
+});
