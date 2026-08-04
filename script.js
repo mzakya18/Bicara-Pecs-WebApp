@@ -209,3 +209,6 @@ const saveCustomWordHandler = () => {
 
 // Start Apps
 init();
+import { kataBendaDb } from './database/kata-benda.js';
+// Lalu gabungkan ke ALL_DB:
+// const ALL_DB = [...kataKerjaDb, ...kataBendaDb]; 
