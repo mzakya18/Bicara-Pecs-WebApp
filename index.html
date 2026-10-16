@@ -105,7 +105,7 @@
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .category.collapsed .grid { display: none; }
 
-        /* Kartu PECS Diperbesar */
+        /* Kartu PECS */
         .pecs-card { background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 16px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease; box-sizing: border-box; }
         .pecs-card:active { transform: scale(0.92); filter: brightness(0.7) contrast(1.2); }
         .pecs-card.card-active-flash { box-shadow: 0 0 0 6px #10b981 !important; transform: scale(0.95); }
@@ -555,7 +555,9 @@
 
         let currentSentence = [];
         let isEditMode = false;
-        let isChildLock = false;
+        
+        // Membaca status mode kunci dari localStorage agar konsisten saat reload
+        let isChildLock = safeGetStorage('pecs_child_lock', false);
         let isImageOnly = safeGetStorage('pecs_img_only', false);
         let lastClickTime = 0;
         let activeTargetItemId = null;
@@ -629,7 +631,6 @@
             }
         }
 
-        // Pengaturan Mode Gambar Saja dari Sidebar Menu
         function toggleImageOnlyModeFromMenu() {
             isImageOnly = !isImageOnly;
             localStorage.setItem('pecs_img_only', JSON.stringify(isImageOnly));
@@ -653,11 +654,9 @@
             }
         }
 
-        // Redesain Mode Kunci Anak (Child Lock)
-        function toggleChildLock() {
-            isChildLock = !isChildLock;
+        // Fungsi memperbarui tampilan Child Lock dan menyimpannya ke LocalStorage
+        function updateChildLockUI() {
             const lockBtn = document.getElementById('lock-btn');
-
             if (isChildLock) {
                 document.body.classList.add('child-locked');
                 if (isEditMode) toggleEditMode();
@@ -672,6 +671,12 @@
                     lockBtn.classList.remove('unlocked-style');
                 }
             }
+        }
+
+        function toggleChildLock() {
+            isChildLock = !isChildLock;
+            localStorage.setItem('pecs_child_lock', JSON.stringify(isChildLock));
+            updateChildLockUI();
         }
 
         function toggleCategoryCollapse(catKey) {
@@ -1009,6 +1014,7 @@
             }
 
             updateImageOnlyState();
+            updateChildLockUI(); // Mempertahankan kondisi mode kunci saat di-reload
 
             if (userSettings) {
                 const radio = document.querySelector(`input[name="level"][value="${userSettings.level}"]`);
