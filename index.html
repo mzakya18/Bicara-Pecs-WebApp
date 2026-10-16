@@ -70,10 +70,15 @@
         .radio-option input { margin-top: 4px; }
 
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 8px; }
-        .icon-btn { background: var(--card-bg); border: 2px solid var(--card-border); color: var(--text-color); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: bold; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;}
+        .icon-btn { background: var(--card-bg); border: 2px solid var(--card-border); color: var(--text-color); padding: 8px 10px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: bold; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;}
         .icon-btn:active { transform: scale(0.92); }
         .icon-btn.active-mode { background: #f59e0b; color: white; border-color: #d97706; }
-        h2.app-title { text-align: center; color: var(--text-color); margin: 0; font-size: 1.3rem; flex-grow: 1; }
+        h2.app-title { text-align: center; color: var(--text-color); margin: 0; font-size: 1.2rem; flex-grow: 1; }
+
+        /* Mode Kunci Anak */
+        body.child-locked .hide-on-lock { display: none !important; }
+        #unlock-banner { display: none; background: #ef4444; color: white; text-align: center; padding: 8px; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 0.85rem; cursor: pointer; }
+        body.child-locked #unlock-banner { display: block; }
 
         #sentence-strip { background-color: var(--card-bg); padding: 12px; border-radius: 12px; min-height: 90px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); margin-bottom: 15px; flex-wrap: wrap; border: 2px dashed var(--border-dashed); transition: 0.3s; }
         .sentence-item { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: var(--card-border); color: var(--text-color); padding: 6px 10px; border-radius: 8px; font-weight: bold; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; transition: 0.2s;}
@@ -86,20 +91,20 @@
         .category { margin-bottom: 25px; transition: all 0.3s ease; }
         .category-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 2px solid var(--card-border); padding-bottom: 6px; }
         .category-header h3 { margin: 0; color: var(--text-color); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
-        .toggle-cat-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: var(--text-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--card-border); }
+        .toggle-cat-btn { background: none; border: none; cursor: pointer; font-size: 0.85rem; color: var(--text-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--card-border); }
         .toggle-cat-btn:hover { background: var(--card-border); }
         
-        /* Grid diatur tepat 3 Kolom per baris agar kartu lebih besar */
+        /* Grid 3 Kolom */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .category.collapsed .grid { display: none; }
 
-        /* Ukuran Kartu PECS Diperbesar */
+        /* Ukuran Kartu Diperbesar */
         .pecs-card { background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 14px; padding: 12px 6px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease; box-sizing: border-box; }
         .pecs-card:active { transform: scale(0.92); filter: brightness(0.7) contrast(1.2); }
         .pecs-card .emoji { font-size: 44px; display: block; margin: 0 auto 6px; line-height: 1; }
         .pecs-card .card-custom-img { width: 52px; height: 52px; object-fit: cover; border-radius: 10px; margin-bottom: 6px; }
 
-        /* Fitzgerald Key Colors */
+        /* Color Coding Fitzgerald Key */
         .subjek { background-color: #fef08a; border-color: #fde047; }
         .kata-kerja { background-color: #bbf7d0; border-color: #86efac; }
         .benda { background-color: #fed7aa; border-color: #fdba74; }
@@ -302,10 +307,14 @@
 
     <!-- Main App -->
     <div id="page-main" class="page">
+        <!-- Banner Mode Kunci Terkunci -->
+        <div id="unlock-banner" onclick="toggleChildLock()">🔒 Mode Anak Terkunci (Ketuk untuk Buka)</div>
+
         <div class="top-bar">
-            <button class="icon-btn" onclick="openMenu()">☰ Menu</button>
+            <button class="icon-btn hide-on-lock" onclick="openMenu()">☰ Menu</button>
             <h2 class="app-title">Papan Bicara</h2>
-            <button class="icon-btn" id="edit-toggle-btn" onclick="toggleEditMode()">⚙️ Edit Papan</button>
+            <button class="icon-btn hide-on-lock" id="edit-toggle-btn" onclick="toggleEditMode()">⚙️ Edit Papan</button>
+            <button class="icon-btn" onclick="toggleChildLock()">🔒 Kunci</button>
         </div>
 
         <div id="sentence-strip">
@@ -339,6 +348,40 @@
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        // Kompresi Gambar Otomatis ke Canvas (Max 300x300, JPEG Quality 0.7)
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 300;
+
+                    if (width > height) {
+                        if (width > maxDim) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        }
+                    } else {
+                        if (height > maxDim) {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         const basePecsDatabase = [
@@ -507,6 +550,8 @@
 
         let currentSentence = [];
         let isEditMode = false;
+        let isChildLock = false;
+        let lastClickTime = 0; // Guard Anti-Ketuk Ganda
         let activeTargetItemId = null;
         
         let wordHistory = safeGetStorage('pecs_history', []);
@@ -531,7 +576,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Navigasi Halaman dengan Menyimpan Status Halaman Terakhir di LocalStorage
         function goToPage(pageId) {
             const pages = document.querySelectorAll('.page');
             pages.forEach(page => page.classList.remove('active'));
@@ -576,6 +620,17 @@
                 btn.classList.remove('active-mode');
                 btn.innerHTML = '⚙️ Edit Papan';
                 mainPage.classList.remove('is-edit-mode');
+            }
+        }
+
+        // Mode Kunci Anak (Child Lock)
+        function toggleChildLock() {
+            isChildLock = !isChildLock;
+            if (isChildLock) {
+                document.body.classList.add('child-locked');
+                if (isEditMode) toggleEditMode(); // Matikan mode edit jika aktif
+            } else {
+                document.body.classList.remove('child-locked');
             }
         }
 
@@ -631,7 +686,7 @@
                     header.className = 'category-header';
                     header.innerHTML = `
                         <h3>${cat.categoryTitle}</h3>
-                        <button class="toggle-cat-btn" onclick="toggleCategoryCollapse('${cat.catKey}')">
+                        <button class="toggle-cat-btn hide-on-lock" onclick="toggleCategoryCollapse('${cat.catKey}')">
                             ${isCollapsed ? '👁️ Tampilkan' : '🙈 Sembunyikan'}
                         </button>
                     `;
@@ -663,7 +718,6 @@
                             }
                         };
 
-                        // Cek apakah ini kartu buatan user (User-Created)
                         const isUserCard = item.isUserCreated || (Array.isArray(userCards) && userCards.some(uc => uc.id === item.id));
 
                         card.innerHTML = `
@@ -685,7 +739,6 @@
             });
         }
 
-        // Fitur Menghapus Kartu Kustom Satu Per Satu
         function deleteCustomCard(itemId, event) {
             event.stopPropagation();
             const confirmDelete = confirm('Apakah Anda yakin ingin menghapus kartu ini secara permanen?');
@@ -727,34 +780,28 @@
                 return;
             }
 
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const base64Image = e.target.result;
+            compressImage(fileInput.files[0], function(compressedBase64) {
                 const newCardId = 'custom_card_' + Date.now();
 
                 const newCardObj = {
                     id: newCardId,
                     catKey: catKey,
                     word: textVal,
-                    imageUrl: base64Image
+                    imageUrl: compressedBase64
                 };
 
                 userCards.push(newCardObj);
                 try {
                     localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
                 } catch (err) {
-                    alert('Ukuran gambar terlalu besar. Gunakan file foto yang lebih kecil.');
+                    alert('Memori penyimpanan penuh. Coba hapus beberapa kartu lama.');
                     return;
                 }
 
                 closeAddCardModal();
                 renderCategories();
                 alert('Kartu PECS baru berhasil ditambahkan!');
-            };
-
-            reader.readAsDataURL(file);
+            });
         }
 
         function editCardText(itemId, currentText, event) {
@@ -777,17 +824,15 @@
             const file = event.target.files[0];
             if (!file || !activeTargetItemId) return;
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                customImages[activeTargetItemId] = e.target.result;
+            compressImage(file, function(compressedBase64) {
+                customImages[activeTargetItemId] = compressedBase64;
                 try {
                     localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
                 } catch (err) {
-                    alert('Ukuran file gambar terlalu besar.');
+                    alert('Memori penyimpanan penuh.');
                 }
                 renderCategories();
-            };
-            reader.readAsDataURL(file);
+            });
             event.target.value = '';
         }
 
@@ -809,7 +854,12 @@
             }
         }
 
+        // Penambahan ke Jalur Kalimat dengan Proteksi Ketuk Ganda (Debounce 400ms)
         function addToSentence(word, emoji, customImgUrl) {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime < 400) return; 
+            lastClickTime = currentTime;
+
             currentSentence.push({ word, emoji, customImgUrl });
             saveToHistory(word);
             updateSentenceStrip();
@@ -900,7 +950,6 @@
             }).join('');
         }
 
-        // Membuka Halaman Terakhir yang Dibuka Pengguna Saat Reload
         window.onload = () => {
             const savedTheme = localStorage.getItem('pecs_theme');
             if (savedTheme) {
@@ -919,7 +968,6 @@
 
             renderCategories();
 
-            // Cek halaman terakhir yang diakses, jika tidak ada baru gunakan welcome page
             const lastActivePage = localStorage.getItem('pecs_active_page') || 'page-welcome';
             goToPage(lastActivePage);
         };
