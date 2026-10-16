@@ -46,7 +46,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
         
-        .page { display: none; padding: 20px; max-width: 800px; margin: 0 auto; min-height: 100vh; padding-bottom: 80px; box-sizing: border-box; }
+        .page { display: none; padding: 15px; max-width: 800px; margin: 0 auto; min-height: 100vh; padding-bottom: 80px; box-sizing: border-box; }
         .page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -75,27 +75,29 @@
         .icon-btn.active-mode { background: #f59e0b; color: white; border-color: #d97706; }
         h2.app-title { text-align: center; color: var(--text-color); margin: 0; font-size: 1.3rem; flex-grow: 1; }
 
-        #sentence-strip { background-color: var(--card-bg); padding: 12px; border-radius: 12px; min-height: 85px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); margin-bottom: 15px; flex-wrap: wrap; border: 2px dashed var(--border-dashed); transition: 0.3s; }
+        #sentence-strip { background-color: var(--card-bg); padding: 12px; border-radius: 12px; min-height: 90px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); margin-bottom: 15px; flex-wrap: wrap; border: 2px dashed var(--border-dashed); transition: 0.3s; }
         .sentence-item { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: var(--card-border); color: var(--text-color); padding: 6px 10px; border-radius: 8px; font-weight: bold; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; transition: 0.2s;}
         .sentence-item:active { transform: scale(0.85); filter: brightness(0.8); }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .sentence-item .emoji { font-size: 26px; margin-bottom: 2px; }
-        .sentence-item .card-custom-img { width: 32px; height: 32px; object-fit: cover; border-radius: 6px; margin-bottom: 2px; }
-        .sentence-item .word { font-size: 12px; }
+        .sentence-item .emoji { font-size: 32px; margin-bottom: 2px; }
+        .sentence-item .card-custom-img { width: 38px; height: 38px; object-fit: cover; border-radius: 6px; margin-bottom: 2px; }
+        .sentence-item .word { font-size: 13px; }
 
         .category { margin-bottom: 25px; transition: all 0.3s ease; }
-        .category-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 2px solid var(--card-border); padding-bottom: 6px; }
-        .category-header h3 { margin: 0; color: var(--text-color); font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+        .category-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 2px solid var(--card-border); padding-bottom: 6px; }
+        .category-header h3 { margin: 0; color: var(--text-color); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
         .toggle-cat-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: var(--text-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--card-border); }
         .toggle-cat-btn:hover { background: var(--card-border); }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 10px; }
+        /* Grid diatur tepat 3 Kolom per baris agar kartu lebih besar */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .category.collapsed .grid { display: none; }
 
-        .pecs-card { background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 12px; padding: 8px 4px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease; box-sizing: border-box; }
+        /* Ukuran Kartu PECS Diperbesar */
+        .pecs-card { background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 14px; padding: 12px 6px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease; box-sizing: border-box; }
         .pecs-card:active { transform: scale(0.92); filter: brightness(0.7) contrast(1.2); }
-        .pecs-card .emoji { font-size: 34px; display: block; margin: 0 auto 4px; line-height: 1; }
-        .pecs-card .card-custom-img { width: 42px; height: 42px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; }
+        .pecs-card .emoji { font-size: 44px; display: block; margin: 0 auto 6px; line-height: 1; }
+        .pecs-card .card-custom-img { width: 52px; height: 52px; object-fit: cover; border-radius: 10px; margin-bottom: 6px; }
 
         /* Fitzgerald Key Colors */
         .subjek { background-color: #fef08a; border-color: #fde047; }
@@ -114,11 +116,12 @@
         .btn-clear { background-color: #ef4444; color: white; }
 
         /* Mode Edit Overlay */
-        .edit-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); border-radius: 9px; flex-direction: column; align-items: center; justify-content: center; gap: 3px; z-index: 10; padding: 2px; box-sizing: border-box; }
+        .edit-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); border-radius: 10px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; z-index: 10; padding: 4px; box-sizing: border-box; }
         .is-edit-mode .edit-overlay { display: flex; }
-        .btn-card-action { background: #3b82f6; color: white; border: none; padding: 3px 6px; border-radius: 5px; font-size: 9px; cursor: pointer; font-weight: bold; width: 90%; text-align: center; }
+        .btn-card-action { background: #3b82f6; color: white; border: none; padding: 4px 6px; border-radius: 5px; font-size: 10px; cursor: pointer; font-weight: bold; width: 92%; text-align: center; }
         .btn-card-action.btn-edit-text { background: #10b981; }
-        .btn-card-action.btn-reset-card { background: #ef4444; }
+        .btn-card-action.btn-reset-card { background: #f59e0b; }
+        .btn-card-action.btn-delete-card { background: #ef4444; }
 
         /* Sidebar Menu */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay-bg); z-index: 99; backdrop-filter: blur(2px); }
@@ -528,6 +531,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // Navigasi Halaman dengan Menyimpan Status Halaman Terakhir di LocalStorage
         function goToPage(pageId) {
             const pages = document.querySelectorAll('.page');
             pages.forEach(page => page.classList.remove('active'));
@@ -535,6 +539,7 @@
             const targetPage = document.getElementById(pageId);
             if (targetPage) {
                 targetPage.classList.add('active');
+                localStorage.setItem('pecs_active_page', pageId);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
@@ -658,6 +663,9 @@
                             }
                         };
 
+                        // Cek apakah ini kartu buatan user (User-Created)
+                        const isUserCard = item.isUserCreated || (Array.isArray(userCards) && userCards.some(uc => uc.id === item.id));
+
                         card.innerHTML = `
                             ${visualContent}
                             <span class="word">${displayWord}</span>
@@ -665,6 +673,7 @@
                                 <button class="btn-card-action" onclick="triggerUpload('${item.id}', event)">📷 Gambar</button>
                                 <button class="btn-card-action btn-edit-text" onclick="editCardText('${item.id}', '${safeDisplayWord}', event)">✏️ Tulisan</button>
                                 ${(hasCustomImg || customLabels[item.id]) ? `<button class="btn-card-action btn-reset-card" onclick="resetCardCustomization('${item.id}', event)">🔄 Reset</button>` : ''}
+                                ${isUserCard ? `<button class="btn-card-action btn-delete-card" onclick="deleteCustomCard('${item.id}', event)">🗑️ Hapus</button>` : ''}
                             </div>
                         `;
                         grid.appendChild(card);
@@ -674,6 +683,23 @@
                     container.appendChild(catSection);
                 }
             });
+        }
+
+        // Fitur Menghapus Kartu Kustom Satu Per Satu
+        function deleteCustomCard(itemId, event) {
+            event.stopPropagation();
+            const confirmDelete = confirm('Apakah Anda yakin ingin menghapus kartu ini secara permanen?');
+            if (confirmDelete) {
+                userCards = userCards.filter(c => c.id !== itemId);
+                delete customImages[itemId];
+                delete customLabels[itemId];
+
+                localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
+                localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
+                localStorage.setItem('pecs_custom_labels', JSON.stringify(customLabels));
+
+                renderCategories();
+            }
         }
 
         function openAddCardModal() {
@@ -874,6 +900,7 @@
             }).join('');
         }
 
+        // Membuka Halaman Terakhir yang Dibuka Pengguna Saat Reload
         window.onload = () => {
             const savedTheme = localStorage.getItem('pecs_theme');
             if (savedTheme) {
@@ -891,6 +918,10 @@
             }
 
             renderCategories();
+
+            // Cek halaman terakhir yang diakses, jika tidak ada baru gunakan welcome page
+            const lastActivePage = localStorage.getItem('pecs_active_page') || 'page-welcome';
+            goToPage(lastActivePage);
         };
     </script>
 </body>
