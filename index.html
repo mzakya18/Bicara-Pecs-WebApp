@@ -2,7 +2,10 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Bicara PECS WebApp</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
@@ -35,9 +38,15 @@
             --overlay-bg: rgba(255,255,255,0.1);
         }
 
+        html, body {
+            background-color: var(--bg-color);
+            touch-action: manipulation;
+            overscroll-behavior-y: none;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body { 
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-color); 
             color: var(--text-color); 
             margin: 0; 
             padding: 0; 
@@ -74,13 +83,11 @@
         .icon-btn:active { transform: scale(0.92); }
         .icon-btn.active-mode { background: #f59e0b; color: white; border-color: #d97706; }
         
-        /* Tombol Kunci Anak */
         .btn-lock { background-color: #ef4444; color: white; border-color: #dc2626; }
         .btn-lock.unlocked-style { background-color: #10b981; color: white; border-color: #059669; }
 
         h2.app-title { text-align: center; color: var(--text-color); margin: 0; font-size: 1.3rem; flex-grow: 1; }
 
-        /* Child Lock & Image-Only Mode */
         body.child-locked .hide-on-lock { display: none !important; }
         body.image-only-mode .pecs-card .word { display: none !important; }
 
@@ -92,7 +99,6 @@
         .sentence-item .card-custom-img { width: 46px; height: 46px; object-fit: cover; border-radius: 6px; margin-bottom: 2px; }
         .sentence-item .word { font-size: 14px; }
         
-        /* Silang Kecil Hapus Kata Individual */
         .sentence-item .item-remove-btn { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
         .category { margin-bottom: 25px; transition: all 0.3s ease; }
@@ -101,18 +107,15 @@
         .toggle-cat-btn { background: none; border: none; cursor: pointer; font-size: 0.85rem; color: var(--text-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--card-border); }
         .toggle-cat-btn:hover { background: var(--card-border); }
         
-        /* Grid 3 Kolom */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .category.collapsed .grid { display: none; }
 
-        /* Kartu PECS */
         .pecs-card { background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 16px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease; box-sizing: border-box; }
         .pecs-card:active { transform: scale(0.92); filter: brightness(0.7) contrast(1.2); }
         .pecs-card.card-active-flash { box-shadow: 0 0 0 6px #10b981 !important; transform: scale(0.95); }
         .pecs-card .emoji { font-size: 58px; display: block; margin: 0 auto 6px; line-height: 1; }
         .pecs-card .card-custom-img { width: 68px; height: 68px; object-fit: cover; border-radius: 12px; margin-bottom: 6px; }
 
-        /* Color Coding Fitzgerald Key */
         .subjek { background-color: #fef08a; border-color: #fde047; }
         .kata-kerja { background-color: #bbf7d0; border-color: #86efac; }
         .benda { background-color: #fed7aa; border-color: #fdba74; }
@@ -128,7 +131,6 @@
         .btn-speak { background-color: var(--primary); color: white; flex: 2 !important; }
         .btn-clear { background-color: #ef4444; color: white; }
 
-        /* Mode Edit Overlay */
         .edit-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); border-radius: 12px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; z-index: 10; padding: 4px; box-sizing: border-box; }
         .is-edit-mode .edit-overlay { display: flex; }
         .btn-card-action { background: #3b82f6; color: white; border: none; padding: 4px 6px; border-radius: 5px; font-size: 11px; cursor: pointer; font-weight: bold; width: 92%; text-align: center; }
@@ -136,7 +138,6 @@
         .btn-card-action.btn-reset-card { background: #f59e0b; }
         .btn-card-action.btn-delete-card { background: #ef4444; }
 
-        /* Sidebar Menu */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay-bg); z-index: 99; backdrop-filter: blur(2px); }
         .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--sidebar-bg); z-index: 100; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 2px 0 10px rgba(0,0,0,0.2); overflow-y: auto; padding: 20px; box-sizing: border-box; }
         .sidebar.open { left: 0; }
@@ -388,7 +389,6 @@
             reader.readAsDataURL(file);
         }
 
-        /* Database Kosakata Bawaan PECS Disesuaikan (Satu Kata Sederhana & Emoji Relevan) */
         const basePecsDatabase = [
             {
                 catKey: 'subjek',
@@ -556,7 +556,6 @@
         let currentSentence = [];
         let isEditMode = false;
         
-        // Membaca status mode kunci dari localStorage agar konsisten saat reload
         let isChildLock = safeGetStorage('pecs_child_lock', false);
         let isImageOnly = safeGetStorage('pecs_img_only', false);
         let lastClickTime = 0;
@@ -654,7 +653,6 @@
             }
         }
 
-        // Fungsi memperbarui tampilan Child Lock dan menyimpannya ke LocalStorage
         function updateChildLockUI() {
             const lockBtn = document.getElementById('lock-btn');
             if (isChildLock) {
@@ -1014,7 +1012,7 @@
             }
 
             updateImageOnlyState();
-            updateChildLockUI(); // Mempertahankan kondisi mode kunci saat di-reload
+            updateChildLockUI();
 
             if (userSettings) {
                 const radio = document.querySelector(`input[name="level"][value="${userSettings.level}"]`);
