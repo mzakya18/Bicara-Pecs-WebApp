@@ -86,7 +86,7 @@
         .category { margin-bottom: 25px; transition: all 0.3s ease; }
         .category-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 2px solid var(--card-border); padding-bottom: 6px; }
         .category-header h3 { margin: 0; color: var(--text-color); font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
-        .toggle-cat-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--text-color); padding: 2px 6px; border-radius: 6px; }
+        .toggle-cat-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; color: var(--text-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--card-border); }
         .toggle-cat-btn:hover { background: var(--card-border); }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 10px; }
@@ -97,7 +97,7 @@
         .pecs-card .emoji { font-size: 34px; display: block; margin: 0 auto 4px; line-height: 1; }
         .pecs-card .card-custom-img { width: 42px; height: 42px; object-fit: cover; border-radius: 8px; margin-bottom: 4px; }
 
-        /* Color Coding Fitzgerald Key */
+        /* Fitzgerald Key Colors */
         .subjek { background-color: #fef08a; border-color: #fde047; }
         .kata-kerja { background-color: #bbf7d0; border-color: #86efac; }
         .benda { background-color: #fed7aa; border-color: #fdba74; }
@@ -149,7 +149,7 @@
 </head>
 <body>
 
-    <!-- Hidden Input File untuk Upload Gambar Kustom Mode Edit -->
+    <!-- Hidden Input File untuk Upload Gambar Mode Edit -->
     <input type="file" id="global-file-input" accept="image/*" style="display: none;" onchange="handleImageSelected(event)">
 
     <!-- Floating Scroll Up Button -->
@@ -182,7 +182,7 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Kartu PECS Kustom Baru -->
+    <!-- Modal Tambah Kartu PECS Baru -->
     <div class="modal" id="add-card-modal">
         <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 8px;">➕ Tambah Kartu PECS Baru</h3>
@@ -191,7 +191,7 @@
                 <label>Kategori Bagian:</label>
                 <select id="new-card-category">
                     <option value="subjek">Subjek</option>
-                    <option value="kata-kerja">Predikat (Kata Kerja)</option>
+                    <option value="katakerja">Predikat (Kata Kerja)</option>
                     <option value="benda_makanan">Objek: Makanan & Minuman</option>
                     <option value="benda_mainan">Objek: Mainan & Sensorik</option>
                     <option value="benda_harian">Objek: Benda Harian</option>
@@ -315,4 +315,583 @@
         </div>
 
         <div id="categories-container"></div>
-    <
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('ServiceWorker failed: ', err));
+            });
+        }
+
+        function safeGetStorage(key, defaultValue) {
+            try {
+                const item = localStorage.getItem(key);
+                return item ? JSON.parse(item) : defaultValue;
+            } catch (e) {
+                return defaultValue;
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        const basePecsDatabase = [
+            {
+                catKey: 'subjek',
+                categoryTitle: '👤 Subjek',
+                type: 'subjek',
+                minLevel: 2,
+                items: [
+                    { id: 's_saya', word: 'Saya', emoji: { L: '🙋‍♂️', P: '🙋‍♀️' } },
+                    { id: 's_bunda', word: 'Bunda / Ibu', emoji: '👩' },
+                    { id: 's_ayah', word: 'Ayah / Bapak', emoji: '👨' },
+                    { id: 's_terapis', word: 'Terapis / Kakak', emoji: '🧑‍🏫' },
+                    { id: 's_teman', word: 'Teman', emoji: '🧑‍🤝‍🧑' }
+                ]
+            },
+            {
+                catKey: 'katakerja',
+                categoryTitle: '🟢 Predikat (Kata Kerja Fungsional)',
+                type: 'kata-kerja',
+                minLevel: 2,
+                items: [
+                    { id: 'v_mau', word: 'Mau / Ingin', emoji: '🤲' },
+                    { id: 'v_minta', word: 'Minta', emoji: '🖐️' },
+                    { id: 'v_lihat', word: 'Lihat', emoji: '👁️' },
+                    { id: 'v_makan', word: 'Makan', emoji: '😋' },
+                    { id: 'v_minum', word: 'Minum', emoji: '🥤' },
+                    { id: 'v_main', word: 'Main', emoji: '🎲' },
+                    { id: 'v_duduk', word: 'Duduk', emoji: '🧘' },
+                    { id: 'v_berdiri', word: 'Berdiri', emoji: '🧍' },
+                    { id: 'v_bantu', word: 'Bantu / Tolong', emoji: '🆘' },
+                    { id: 'v_buka', word: 'Buka', emoji: '📂' },
+                    { id: 'v_tutup', word: 'Tutup', emoji: '🔒' },
+                    { id: 'v_stop', word: 'Selesai / Stop', emoji: '🛑' },
+                    { id: 'v_tidur', word: 'Tidur', emoji: '😴' },
+                    { id: 'v_dengar', word: 'Dengar', emoji: '👂' },
+                    { id: 'v_pegang', word: 'Pegang', emoji: '✊' },
+                    { id: 'v_toilet', word: 'Toilet / Buang Air', emoji: '🚻' }
+                ]
+            },
+            {
+                catKey: 'benda_makanan',
+                categoryTitle: '🍎 Objek: Makanan & Minuman',
+                type: 'benda',
+                minLevel: 1,
+                items: [
+                    { id: 'o_air', word: 'Air', emoji: '💧' },
+                    { id: 'o_susu', word: 'Susu', emoji: '🧃' },
+                    { id: 'o_nasi', word: 'Nasi', emoji: '🍚' },
+                    { id: 'o_roti', word: 'Roti', emoji: '🍞' },
+                    { id: 'o_biskuit', word: 'Biskuit', emoji: '🍪' },
+                    { id: 'o_buah', word: 'Buah', emoji: '🍎' },
+                    { id: 'o_permen', word: 'Permen', emoji: '🍬' },
+                    { id: 'o_eskrim', word: 'Es Krim', emoji: '🍦' }
+                ]
+            },
+            {
+                catKey: 'benda_mainan',
+                categoryTitle: '🧸 Objek: Mainan & Sensorik',
+                type: 'benda',
+                minLevel: 1,
+                items: [
+                    { id: 'o_bola', word: 'Bola', emoji: '⚽' },
+                    { id: 'o_mobil', word: 'Mobil-mobilan', emoji: '🚗' },
+                    { id: 'o_gelembung', word: 'Gelembung Sabun', emoji: '🫧' },
+                    { id: 'o_ayunan', word: 'Ayunan', emoji: '🛝' },
+                    { id: 'o_puzzle', word: 'Puzzle', emoji: '🧩' },
+                    { id: 'o_balok', word: 'Balok', emoji: '🧱' },
+                    { id: 'o_trampolin', word: 'Trampolin', emoji: '🦘' },
+                    { id: 'o_lilin', word: 'Lilin Mainan', emoji: '🎨' }
+                ]
+            },
+            {
+                catKey: 'benda_harian',
+                categoryTitle: '📦 Objek: Benda Harian',
+                type: 'benda',
+                minLevel: 1,
+                items: [
+                    { id: 'o_sendok', word: 'Sendok', emoji: '🥄' },
+                    { id: 'o_gelas', word: 'Gelas', emoji: '🥛' },
+                    { id: 'o_piring', word: 'Piring', emoji: '🍽️' },
+                    { id: 'o_baju', word: 'Baju', emoji: '👕' },
+                    { id: 'o_celana', word: 'Celana', emoji: '👖' },
+                    { id: 'o_sepatu', word: 'Sepatu', emoji: '👟' },
+                    { id: 'o_handuk', word: 'Handuk', emoji: '🧖' },
+                    { id: 'o_tisu', word: 'Tisu', emoji: '🧻' },
+                    { id: 'o_tas', word: 'Tas', emoji: '🎒' },
+                    { id: 'o_piyama', word: 'Piyama', emoji: '🥼' }
+                ]
+            },
+            {
+                catKey: 'benda_media',
+                categoryTitle: '📱 Objek: Media & Hiburan',
+                type: 'benda',
+                minLevel: 1,
+                items: [
+                    { id: 'o_tablet', word: 'Tablet', emoji: '📱' },
+                    { id: 'o_musik', word: 'Musik', emoji: '🎵' },
+                    { id: 'o_video', word: 'Video', emoji: '📹' },
+                    { id: 'o_buku', word: 'Buku', emoji: '📖' }
+                ]
+            },
+            {
+                catKey: 'tempat',
+                categoryTitle: '📍 Keterangan Tempat',
+                type: 'tempat',
+                minLevel: 3,
+                items: [
+                    { id: 'k_kamar', word: 'Di Kamar', emoji: '🛏️' },
+                    { id: 'k_toilet', word: 'Di Toilet', emoji: '🚽' },
+                    { id: 'k_meja', word: 'Di Meja', emoji: '🪵' },
+                    { id: 'k_luar', word: 'Di Luar', emoji: '🌳' },
+                    { id: 'k_dalam', word: 'Di Dalam', emoji: '🏠' },
+                    { id: 'k_sekolah', word: 'Di Sekolah', emoji: '🏫' },
+                    { id: 'k_rumah', word: 'Di Rumah', emoji: '🏡' },
+                    { id: 'k_mobil', word: 'Di Mobil', emoji: '🚘' }
+                ]
+            },
+            {
+                catKey: 'perasaan',
+                categoryTitle: '💬 Keterangan Keadaan / Sensorik',
+                type: 'perasaan',
+                minLevel: 3,
+                items: [
+                    { id: 'ks_lapar', word: 'Lapar', emoji: '🤤' },
+                    { id: 'ks_haus', word: 'Haus', emoji: '🥵' },
+                    { id: 'ks_sakit', word: 'Sakit', emoji: '🤒' },
+                    { id: 'ks_capek', word: 'Capek', emoji: '😮‍💨' },
+                    { id: 'ks_panas', word: 'Panas', emoji: '🔥' },
+                    { id: 'ks_dingin', word: 'Dingin', emoji: '🧊' },
+                    { id: 'ks_bising', word: 'Bising', emoji: '🔊' },
+                    { id: 'ks_gatal', word: 'Gatal', emoji: '🐜' },
+                    { id: 'ks_nyaman', word: 'Nyaman', emoji: '😌' },
+                    { id: 'ks_takut', word: 'Takut', emoji: '😨' }
+                ]
+            },
+            {
+                catKey: 'sifat',
+                categoryTitle: '🎨 Keterangan Sifat / Atribut',
+                type: 'sifat',
+                minLevel: 3,
+                items: [
+                    { id: 'sa_besar', word: 'Besar', emoji: '🐘' },
+                    { id: 'sa_kecil', word: 'Kecil', emoji: '🐭' },
+                    { id: 'sa_banyak', word: 'Banyak', emoji: '🔢' },
+                    { id: 'sa_sedikit', word: 'Sedikit', emoji: '🤏' },
+                    { id: 'sa_merah', word: 'Merah', emoji: '🔴' },
+                    { id: 'sa_biru', word: 'Biru', emoji: '🔵' },
+                    { id: 'sa_kuning', word: 'Kuning', emoji: '🟡' },
+                    { id: 'sa_hijau', word: 'Hijau', emoji: '🟢' }
+                ]
+            },
+            {
+                catKey: 'waktu',
+                categoryTitle: '⏱️ Keterangan Waktu / Urutan',
+                type: 'waktu',
+                minLevel: 3,
+                items: [
+                    { id: 'w_sekarang', word: 'Sekarang', emoji: '⏰' },
+                    { id: 'w_nanti', word: 'Nanti', emoji: '⏳' },
+                    { id: 'w_lagi', word: 'Lagi', emoji: '🔄' },
+                    { id: 'w_selesai', word: 'Selesai', emoji: '✅' }
+                ]
+            }
+        ];
+
+        let currentSentence = [];
+        let isEditMode = false;
+        let activeTargetItemId = null;
+        
+        let wordHistory = safeGetStorage('pecs_history', []);
+        let userSettings = safeGetStorage('pecs_settings', { level: 1, gender: 'L' });
+        let customImages = safeGetStorage('pecs_custom_images', {});
+        let customLabels = safeGetStorage('pecs_custom_labels', {});
+        let userCards = safeGetStorage('pecs_user_cards', []);
+        let collapsedCategories = safeGetStorage('pecs_collapsed_cats', {});
+
+        window.onscroll = function() {
+            const btn = document.getElementById('btn-scroll-top');
+            if (btn) {
+                if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                    btn.style.display = 'block';
+                } else {
+                    btn.style.display = 'none';
+                }
+            }
+        };
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function openMenu() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('sidebar').classList.add('open');
+        }
+
+        function closeMenu() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function changeTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            localStorage.setItem('pecs_theme', theme);
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('edit-toggle-btn');
+            const mainPage = document.getElementById('page-main');
+
+            if (isEditMode) {
+                btn.classList.add('active-mode');
+                btn.innerHTML = '✅ Selesai Edit';
+                mainPage.classList.add('is-edit-mode');
+            } else {
+                btn.classList.remove('active-mode');
+                btn.innerHTML = '⚙️ Edit Papan';
+                mainPage.classList.remove('is-edit-mode');
+            }
+        }
+
+        function toggleCategoryCollapse(catKey) {
+            collapsedCategories[catKey] = !collapsedCategories[catKey];
+            localStorage.setItem('pecs_collapsed_cats', JSON.stringify(collapsedCategories));
+            renderCategories();
+        }
+
+        function saveSettingsAndStart() {
+            const selectedRadio = document.querySelector('input[name="level"]:checked');
+            const selectedLevel = selectedRadio ? parseInt(selectedRadio.value) : 1;
+            const selectedGender = document.getElementById('select-gender').value;
+
+            userSettings = { level: selectedLevel, gender: selectedGender };
+            localStorage.setItem('pecs_settings', JSON.stringify(userSettings));
+
+            renderCategories();
+            goToPage('page-main');
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categories-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let activeDatabase = JSON.parse(JSON.stringify(basePecsDatabase));
+            
+            if (Array.isArray(userCards)) {
+                userCards.forEach(uCard => {
+                    const targetCat = activeDatabase.find(c => c.catKey === uCard.catKey);
+                    if (targetCat) {
+                        targetCat.items.push({
+                            id: uCard.id,
+                            word: uCard.word,
+                            emoji: '🖼️',
+                            isUserCreated: true
+                        });
+                        if (uCard.imageUrl) {
+                            customImages[uCard.id] = uCard.imageUrl;
+                        }
+                    }
+                });
+            }
+
+            activeDatabase.forEach(cat => {
+                if (cat.minLevel <= userSettings.level) {
+                    const isCollapsed = !!collapsedCategories[cat.catKey];
+                    const catSection = document.createElement('div');
+                    catSection.className = `category ${isCollapsed ? 'collapsed' : ''}`;
+
+                    const header = document.createElement('div');
+                    header.className = 'category-header';
+                    header.innerHTML = `
+                        <h3>${cat.categoryTitle}</h3>
+                        <button class="toggle-cat-btn" onclick="toggleCategoryCollapse('${cat.catKey}')">
+                            ${isCollapsed ? '👁️ Tampilkan' : '🙈 Sembunyikan'}
+                        </button>
+                    `;
+                    catSection.appendChild(header);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'grid';
+
+                    cat.items.forEach(item => {
+                        let defaultEmoji = item.emoji;
+                        if (typeof item.emoji === 'object') {
+                            defaultEmoji = item.emoji[userSettings.gender] || item.emoji['L'];
+                        }
+
+                        const displayWord = customLabels[item.id] || item.word;
+                        const safeDisplayWord = escapeHtml(displayWord);
+
+                        const card = document.createElement('div');
+                        card.className = `pecs-card ${cat.type}`;
+                        
+                        const hasCustomImg = !!customImages[item.id];
+                        const visualContent = hasCustomImg 
+                            ? `<img src="${customImages[item.id]}" class="card-custom-img" alt="${safeDisplayWord}">`
+                            : `<span class="emoji">${defaultEmoji}</span>`;
+
+                        card.onclick = (e) => {
+                            if (!isEditMode) {
+                                addToSentence(displayWord, defaultEmoji, customImages[item.id]);
+                            }
+                        };
+
+                        card.innerHTML = `
+                            ${visualContent}
+                            <span class="word">${displayWord}</span>
+                            <div class="edit-overlay">
+                                <button class="btn-card-action" onclick="triggerUpload('${item.id}', event)">📷 Gambar</button>
+                                <button class="btn-card-action btn-edit-text" onclick="editCardText('${item.id}', '${safeDisplayWord}', event)">✏️ Tulisan</button>
+                                ${(hasCustomImg || customLabels[item.id]) ? `<button class="btn-card-action btn-reset-card" onclick="resetCardCustomization('${item.id}', event)">🔄 Reset</button>` : ''}
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+
+                    catSection.appendChild(grid);
+                    container.appendChild(catSection);
+                }
+            });
+        }
+
+        function openAddCardModal() {
+            document.getElementById('add-card-modal').classList.add('open');
+        }
+
+        function closeAddCardModal() {
+            document.getElementById('add-card-modal').classList.remove('open');
+            document.getElementById('new-card-text').value = '';
+            document.getElementById('new-card-file').value = '';
+        }
+
+        function submitNewCustomCard() {
+            const catKey = document.getElementById('new-card-category').value;
+            const textVal = document.getElementById('new-card-text').value.trim();
+            const fileInput = document.getElementById('new-card-file');
+
+            if (!textVal) {
+                alert('Tulisan/Label kartu tidak boleh kosong!');
+                return;
+            }
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Gambar/Foto kartu wajib diupload! Tidak boleh kosong.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const base64Image = e.target.result;
+                const newCardId = 'custom_card_' + Date.now();
+
+                const newCardObj = {
+                    id: newCardId,
+                    catKey: catKey,
+                    word: textVal,
+                    imageUrl: base64Image
+                };
+
+                userCards.push(newCardObj);
+                try {
+                    localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
+                } catch (err) {
+                    alert('Ukuran gambar terlalu besar. Gunakan file foto yang lebih kecil.');
+                    return;
+                }
+
+                closeAddCardModal();
+                renderCategories();
+                alert('Kartu PECS baru berhasil ditambahkan!');
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function editCardText(itemId, currentText, event) {
+            event.stopPropagation();
+            const newText = prompt('Masukkan tulisan/nama baru untuk kartu ini:', currentText);
+            if (newText !== null && newText.trim() !== '') {
+                customLabels[itemId] = newText.trim();
+                localStorage.setItem('pecs_custom_labels', JSON.stringify(customLabels));
+                renderCategories();
+            }
+        }
+
+        function triggerUpload(itemId, event) {
+            event.stopPropagation();
+            activeTargetItemId = itemId;
+            document.getElementById('global-file-input').click();
+        }
+
+        function handleImageSelected(event) {
+            const file = event.target.files[0];
+            if (!file || !activeTargetItemId) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                customImages[activeTargetItemId] = e.target.result;
+                try {
+                    localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
+                } catch (err) {
+                    alert('Ukuran file gambar terlalu besar.');
+                }
+                renderCategories();
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function resetCardCustomization(itemId, event) {
+            event.stopPropagation();
+            delete customImages[itemId];
+            delete customLabels[itemId];
+            localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
+            localStorage.setItem('pecs_custom_labels', JSON.stringify(customLabels));
+            renderCategories();
+        }
+
+        function resetToDefaultSettings() {
+            const confirmReset = confirm('Apakah Anda yakin ingin menghapus semua kustomisasi dan mengembalikan ke pengaturan awal?');
+            if (confirmReset) {
+                localStorage.clear();
+                alert('Aplikasi telah dikembalikan ke pengaturan awal.');
+                window.location.reload();
+            }
+        }
+
+        function addToSentence(word, emoji, customImgUrl) {
+            currentSentence.push({ word, emoji, customImgUrl });
+            saveToHistory(word);
+            updateSentenceStrip();
+            speakText(word);
+        }
+
+        function updateSentenceStrip() {
+            const strip = document.getElementById('sentence-strip');
+            if (!strip) return;
+
+            if (currentSentence.length === 0) {
+                strip.innerHTML = '<span style="color: #94a3b8; width: 100%; text-align: center; font-size: 0.95rem;" id="placeholder-text">Ketuk gambar di bawah untuk menyusun kalimat...</span>';
+                return;
+            }
+
+            strip.innerHTML = '';
+            currentSentence.forEach((item, index) => {
+                const elem = document.createElement('div');
+                elem.className = 'sentence-item';
+                elem.onclick = () => removeFromSentence(index);
+
+                const visualContent = item.customImgUrl 
+                    ? `<img src="${item.customImgUrl}" class="card-custom-img" alt="${escapeHtml(item.word)}">`
+                    : `<span class="emoji">${item.emoji}</span>`;
+
+                elem.innerHTML = `
+                    ${visualContent}
+                    <span class="word">${item.word}</span>
+                `;
+                strip.appendChild(elem);
+            });
+        }
+
+        function removeFromSentence(index) {
+            currentSentence.splice(index, 1);
+            updateSentenceStrip();
+        }
+
+        function clearSentence() {
+            currentSentence = [];
+            updateSentenceStrip();
+        }
+
+        function speakSentence() {
+            if (currentSentence.length === 0) return;
+            const fullText = currentSentence.map(item => item.word).join(' ');
+            speakText(fullText);
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function saveToHistory(word) {
+            const now = new Date().getTime();
+            wordHistory.unshift({ word, timestamp: now });
+            wordHistory = wordHistory.filter(item => (now - item.timestamp) < 86400000);
+            localStorage.setItem('pecs_history', JSON.stringify(wordHistory));
+        }
+
+        function renderHistory() {
+            const historyList = document.getElementById('history-list');
+            if (!historyList) return;
+
+            const now = new Date().getTime();
+            wordHistory = wordHistory.filter(item => (now - item.timestamp) < 86400000);
+            
+            if (wordHistory.length === 0) {
+                historyList.innerHTML = '<p style="text-align:center; color:#94a3b8;">Belum ada riwayat kata hari ini.</p>';
+                return;
+            }
+
+            historyList.innerHTML = wordHistory.map(item => {
+                const date = new Date(item.timestamp);
+                const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="history-item">
+                        <span class="word">${escapeHtml(item.word)}</span>
+                        <span class="time">${timeStr}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('pecs_theme');
+            if (savedTheme) {
+                const selectTheme = document.getElementById('theme-select');
+                if (selectTheme) selectTheme.value = savedTheme;
+                changeTheme(savedTheme);
+            }
+
+            if (userSettings) {
+                const radio = document.querySelector(`input[name="level"][value="${userSettings.level}"]`);
+                if (radio) radio.checked = true;
+                
+                const genderSelect = document.getElementById('select-gender');
+                if (genderSelect && userSettings.gender) genderSelect.value = userSettings.gender;
+            }
+
+            renderCategories();
+        };
+    </script>
+</body>
+</html>
