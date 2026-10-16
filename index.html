@@ -69,40 +69,48 @@
         .radio-option { display: flex; align-items: flex-start; gap: 10px; background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--card-border); cursor: pointer; transition: 0.2s; }
         .radio-option input { margin-top: 4px; }
 
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 8px; }
-        .icon-btn { background: var(--card-bg); border: 2px solid var(--card-border); color: var(--text-color); padding: 8px 10px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: bold; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;}
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 6px; }
+        .icon-btn { background: var(--card-bg); border: 2px solid var(--card-border); color: var(--text-color); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: bold; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;}
         .icon-btn:active { transform: scale(0.92); }
         .icon-btn.active-mode { background: #f59e0b; color: white; border-color: #d97706; }
-        h2.app-title { text-align: center; color: var(--text-color); margin: 0; font-size: 1.2rem; flex-grow: 1; }
+        
+        /* Tombol Kunci Anak */
+        .btn-lock { background-color: #ef4444; color: white; border-color: #dc2626; }
+        .btn-lock.unlocked-style { background-color: #10b981; color: white; border-color: #059669; }
 
-        /* Mode Kunci Anak */
+        h2.app-title { text-align: center; color: var(--text-color); margin: 0; font-size: 1.3rem; flex-grow: 1; }
+
+        /* Child Lock & Image-Only Mode */
         body.child-locked .hide-on-lock { display: none !important; }
-        #unlock-banner { display: none; background: #ef4444; color: white; text-align: center; padding: 8px; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 0.85rem; cursor: pointer; }
-        body.child-locked #unlock-banner { display: block; }
+        body.image-only-mode .pecs-card .word { display: none !important; }
 
-        #sentence-strip { background-color: var(--card-bg); padding: 12px; border-radius: 12px; min-height: 90px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); margin-bottom: 15px; flex-wrap: wrap; border: 2px dashed var(--border-dashed); transition: 0.3s; }
-        .sentence-item { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: var(--card-border); color: var(--text-color); padding: 6px 10px; border-radius: 8px; font-weight: bold; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; transition: 0.2s;}
+        #sentence-strip { background-color: var(--card-bg); padding: 12px; border-radius: 12px; min-height: 95px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); margin-bottom: 15px; flex-wrap: wrap; border: 2px dashed var(--border-dashed); transition: 0.3s; }
+        .sentence-item { position: relative; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: var(--card-border); color: var(--text-color); padding: 8px 12px; border-radius: 10px; font-weight: bold; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; transition: 0.2s;}
         .sentence-item:active { transform: scale(0.85); filter: brightness(0.8); }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .sentence-item .emoji { font-size: 32px; margin-bottom: 2px; }
-        .sentence-item .card-custom-img { width: 38px; height: 38px; object-fit: cover; border-radius: 6px; margin-bottom: 2px; }
-        .sentence-item .word { font-size: 13px; }
+        .sentence-item .emoji { font-size: 38px; margin-bottom: 2px; }
+        .sentence-item .card-custom-img { width: 46px; height: 46px; object-fit: cover; border-radius: 6px; margin-bottom: 2px; }
+        .sentence-item .word { font-size: 14px; }
+        
+        /* Silang Kecil Hapus Kata Individual */
+        .sentence-item .item-remove-btn { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
         .category { margin-bottom: 25px; transition: all 0.3s ease; }
         .category-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 2px solid var(--card-border); padding-bottom: 6px; }
-        .category-header h3 { margin: 0; color: var(--text-color); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .category-header h3 { margin: 0; color: var(--text-color); font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
         .toggle-cat-btn { background: none; border: none; cursor: pointer; font-size: 0.85rem; color: var(--text-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--card-border); }
         .toggle-cat-btn:hover { background: var(--card-border); }
         
         /* Grid 3 Kolom */
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .category.collapsed .grid { display: none; }
 
-        /* Ukuran Kartu Diperbesar */
-        .pecs-card { background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 14px; padding: 12px 6px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease; box-sizing: border-box; }
+        /* Kartu PECS Diperbesar */
+        .pecs-card { background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 16px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease; box-sizing: border-box; }
         .pecs-card:active { transform: scale(0.92); filter: brightness(0.7) contrast(1.2); }
-        .pecs-card .emoji { font-size: 44px; display: block; margin: 0 auto 6px; line-height: 1; }
-        .pecs-card .card-custom-img { width: 52px; height: 52px; object-fit: cover; border-radius: 10px; margin-bottom: 6px; }
+        .pecs-card.card-active-flash { box-shadow: 0 0 0 6px #10b981 !important; transform: scale(0.95); }
+        .pecs-card .emoji { font-size: 58px; display: block; margin: 0 auto 6px; line-height: 1; }
+        .pecs-card .card-custom-img { width: 68px; height: 68px; object-fit: cover; border-radius: 12px; margin-bottom: 6px; }
 
         /* Color Coding Fitzgerald Key */
         .subjek { background-color: #fef08a; border-color: #fde047; }
@@ -115,15 +123,15 @@
         [data-theme="dark"] .pecs-card { color: #0f172a; } 
 
         .controls { display: flex; gap: 10px; margin-bottom: 20px; }
-        .controls button { padding: 14px; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
+        .controls button { padding: 14px; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;}
         .controls button:active { transform: scale(0.95); }
-        .btn-speak { background-color: var(--primary); color: white; }
+        .btn-speak { background-color: var(--primary); color: white; flex: 2 !important; }
         .btn-clear { background-color: #ef4444; color: white; }
 
         /* Mode Edit Overlay */
-        .edit-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); border-radius: 10px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; z-index: 10; padding: 4px; box-sizing: border-box; }
+        .edit-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); border-radius: 12px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; z-index: 10; padding: 4px; box-sizing: border-box; }
         .is-edit-mode .edit-overlay { display: flex; }
-        .btn-card-action { background: #3b82f6; color: white; border: none; padding: 4px 6px; border-radius: 5px; font-size: 10px; cursor: pointer; font-weight: bold; width: 92%; text-align: center; }
+        .btn-card-action { background: #3b82f6; color: white; border: none; padding: 4px 6px; border-radius: 5px; font-size: 11px; cursor: pointer; font-weight: bold; width: 92%; text-align: center; }
         .btn-card-action.btn-edit-text { background: #10b981; }
         .btn-card-action.btn-reset-card { background: #f59e0b; }
         .btn-card-action.btn-delete-card { background: #ef4444; }
@@ -134,7 +142,7 @@
         .sidebar.open { left: 0; }
         .sidebar h3 { margin-top: 0; border-bottom: 2px solid var(--header-border); padding-bottom: 10px; color: var(--text-color); }
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .sidebar-menu li { padding: 14px 0; border-bottom: 1px solid var(--header-border); cursor: pointer; color: var(--text-color); font-weight: 500; display: flex; align-items: center; gap: 10px; transition: 0.2s;}
+        .sidebar-menu li { padding: 14px 0; border-bottom: 1px solid var(--header-border); cursor: pointer; color: var(--text-color); font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: 0.2s;}
         .sidebar-menu li:active { opacity: 0.5; }
         .close-sidebar { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-color); }
 
@@ -145,11 +153,9 @@
         .theme-selector { margin-top: 20px; padding: 10px; background: rgba(59,130,246,0.1); border-radius: 8px; }
         .theme-selector select { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-color); margin-top: 5px; }
 
-        /* Floating Scroll Up Button */
         #btn-scroll-top { display: none; position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; background-color: var(--primary); color: white; border: none; border-radius: 50%; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 90; transition: all 0.3s ease; }
         #btn-scroll-top:active { transform: scale(0.9); }
 
-        /* Modal Tambah PECS Kustom */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay-bg); z-index: 105; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; }
         .modal.open { display: flex; }
         .modal-content { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 15px; padding: 20px; box-shadow: var(--shadow); box-sizing: border-box; }
@@ -157,10 +163,8 @@
 </head>
 <body>
 
-    <!-- Hidden Input File untuk Upload Gambar Mode Edit -->
     <input type="file" id="global-file-input" accept="image/*" style="display: none;" onchange="handleImageSelected(event)">
 
-    <!-- Floating Scroll Up Button -->
     <button id="btn-scroll-top" onclick="scrollToTop()" title="Kembali ke atas">⬆️</button>
 
     <!-- Sidebar Menu -->
@@ -169,12 +173,16 @@
         <button class="close-sidebar" onclick="closeMenu()">×</button>
         <h3>Menu Aplikasi</h3>
         <ul class="sidebar-menu">
-            <li onclick="goToPage('page-main'); closeMenu();">🏠 Papan Utama</li>
-            <li onclick="openAddCardModal(); closeMenu();">➕ Tambah Kartu PECS</li>
-            <li onclick="goToPage('page-history'); renderHistory(); closeMenu();">⏱️ Riwayat Kata (24 Jam)</li>
-            <li onclick="goToPage('page-assessment'); closeMenu();">📝 Tentukan Kemampuan</li>
-            <li onclick="goToPage('page-references'); closeMenu();">📚 Dasar Referensi</li>
-            <li onclick="resetToDefaultSettings()" style="color: #ef4444; font-weight: bold;">🔄 Reset Pengaturan Awal</li>
+            <li onclick="goToPage('page-main'); closeMenu();"><span>🏠 Papan Utama</span></li>
+            <li onclick="openAddCardModal(); closeMenu();"><span>➕ Tambah Kartu PECS</span></li>
+            <li onclick="toggleImageOnlyModeFromMenu()">
+                <span>🖼️ Mode Gambar Saja</span>
+                <strong id="img-only-label" style="color:var(--primary); font-size:0.85rem;">Nonaktif</strong>
+            </li>
+            <li onclick="goToPage('page-history'); renderHistory(); closeMenu();"><span>⏱️ Riwayat Kata (24 Jam)</span></li>
+            <li onclick="goToPage('page-assessment'); closeMenu();"><span>📝 Tentukan Kemampuan</span></li>
+            <li onclick="goToPage('page-references'); closeMenu();"><span>📚 Dasar Referensi</span></li>
+            <li onclick="resetToDefaultSettings()" style="color: #ef4444; font-weight: bold;"><span>🔄 Reset Pengaturan Awal</span></li>
         </ul>
         
         <div class="theme-selector">
@@ -190,7 +198,7 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Kartu PECS Baru -->
+    <!-- Modal Tambah Kartu -->
     <div class="modal" id="add-card-modal">
         <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 8px;">➕ Tambah Kartu PECS Baru</h3>
@@ -307,14 +315,11 @@
 
     <!-- Main App -->
     <div id="page-main" class="page">
-        <!-- Banner Mode Kunci Terkunci -->
-        <div id="unlock-banner" onclick="toggleChildLock()">🔒 Mode Anak Terkunci (Ketuk untuk Buka)</div>
-
         <div class="top-bar">
             <button class="icon-btn hide-on-lock" onclick="openMenu()">☰ Menu</button>
             <h2 class="app-title">Papan Bicara</h2>
-            <button class="icon-btn hide-on-lock" id="edit-toggle-btn" onclick="toggleEditMode()">⚙️ Edit Papan</button>
-            <button class="icon-btn" onclick="toggleChildLock()">🔒 Kunci</button>
+            <button class="icon-btn hide-on-lock" id="edit-toggle-btn" onclick="toggleEditMode()">⚙️ Edit</button>
+            <button class="icon-btn btn-lock" id="lock-btn" onclick="toggleChildLock()">🔒 Kunci</button>
         </div>
 
         <div id="sentence-strip">
@@ -323,7 +328,7 @@
         
         <div class="controls">
             <button class="btn-speak" onclick="speakSentence()">🔊 Bicara</button>
-            <button class="btn-clear" onclick="clearSentence()">❌ Hapus</button>
+            <button class="btn-clear" onclick="clearSentence()">❌ Semua</button>
         </div>
 
         <div id="categories-container"></div>
@@ -350,7 +355,6 @@
             return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
 
-        // Kompresi Gambar Otomatis ke Canvas (Max 300x300, JPEG Quality 0.7)
         function compressImage(file, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -384,6 +388,7 @@
             reader.readAsDataURL(file);
         }
 
+        /* Database Kosakata Bawaan PECS Disesuaikan (Satu Kata Sederhana & Emoji Relevan) */
         const basePecsDatabase = [
             {
                 catKey: 'subjek',
@@ -392,9 +397,9 @@
                 minLevel: 2,
                 items: [
                     { id: 's_saya', word: 'Saya', emoji: { L: '🙋‍♂️', P: '🙋‍♀️' } },
-                    { id: 's_bunda', word: 'Bunda / Ibu', emoji: '👩' },
-                    { id: 's_ayah', word: 'Ayah / Bapak', emoji: '👨' },
-                    { id: 's_terapis', word: 'Terapis / Kakak', emoji: '🧑‍🏫' },
+                    { id: 's_bunda', word: 'Bunda', emoji: '👩' },
+                    { id: 's_ayah', word: 'Ayah', emoji: '👨' },
+                    { id: 's_terapis', word: 'Terapis', emoji: '🧑‍🏫' },
                     { id: 's_teman', word: 'Teman', emoji: '🧑‍🤝‍🧑' }
                 ]
             },
@@ -404,7 +409,7 @@
                 type: 'kata-kerja',
                 minLevel: 2,
                 items: [
-                    { id: 'v_mau', word: 'Mau / Ingin', emoji: '🤲' },
+                    { id: 'v_mau', word: 'Mau', emoji: '🤲' },
                     { id: 'v_minta', word: 'Minta', emoji: '🖐️' },
                     { id: 'v_lihat', word: 'Lihat', emoji: '👁️' },
                     { id: 'v_makan', word: 'Makan', emoji: '😋' },
@@ -412,14 +417,14 @@
                     { id: 'v_main', word: 'Main', emoji: '🎲' },
                     { id: 'v_duduk', word: 'Duduk', emoji: '🧘' },
                     { id: 'v_berdiri', word: 'Berdiri', emoji: '🧍' },
-                    { id: 'v_bantu', word: 'Bantu / Tolong', emoji: '🆘' },
+                    { id: 'v_bantu', word: 'Tolong', emoji: '🆘' },
                     { id: 'v_buka', word: 'Buka', emoji: '📂' },
                     { id: 'v_tutup', word: 'Tutup', emoji: '🔒' },
-                    { id: 'v_stop', word: 'Selesai / Stop', emoji: '🛑' },
+                    { id: 'v_stop', word: 'Selesai', emoji: '🛑' },
                     { id: 'v_tidur', word: 'Tidur', emoji: '😴' },
-                    { id: 'v_dengar', word: 'Dengar', emoji: '👂' },
-                    { id: 'v_pegang', word: 'Pegang', emoji: '✊' },
-                    { id: 'v_toilet', word: 'Toilet / Buang Air', emoji: '🚻' }
+                    { id: 'v_toilet', word: 'Toilet', emoji: '🚽' },
+                    { id: 'v_pipis', word: 'Pipis', emoji: '💧' },
+                    { id: 'v_bab', word: 'BAB', emoji: '💩' }
                 ]
             },
             {
@@ -429,7 +434,7 @@
                 minLevel: 1,
                 items: [
                     { id: 'o_air', word: 'Air', emoji: '💧' },
-                    { id: 'o_susu', word: 'Susu', emoji: '🧃' },
+                    { id: 'o_susu', word: 'Susu', emoji: '🥛' },
                     { id: 'o_nasi', word: 'Nasi', emoji: '🍚' },
                     { id: 'o_roti', word: 'Roti', emoji: '🍞' },
                     { id: 'o_biskuit', word: 'Biskuit', emoji: '🍪' },
@@ -445,13 +450,13 @@
                 minLevel: 1,
                 items: [
                     { id: 'o_bola', word: 'Bola', emoji: '⚽' },
-                    { id: 'o_mobil', word: 'Mobil-mobilan', emoji: '🚗' },
-                    { id: 'o_gelembung', word: 'Gelembung Sabun', emoji: '🫧' },
+                    { id: 'o_mobil', word: 'Mobil', emoji: '🚗' },
+                    { id: 'o_gelembung', word: 'Gelembung', emoji: '🫧' },
                     { id: 'o_ayunan', word: 'Ayunan', emoji: '🛝' },
                     { id: 'o_puzzle', word: 'Puzzle', emoji: '🧩' },
                     { id: 'o_balok', word: 'Balok', emoji: '🧱' },
-                    { id: 'o_trampolin', word: 'Trampolin', emoji: '🦘' },
-                    { id: 'o_lilin', word: 'Lilin Mainan', emoji: '🎨' }
+                    { id: 'o_trampolin', word: 'Trampolin', emoji: '🤸' },
+                    { id: 'o_lilin', word: 'Lilin', emoji: '🎨' }
                 ]
             },
             {
@@ -469,7 +474,7 @@
                     { id: 'o_handuk', word: 'Handuk', emoji: '🧖' },
                     { id: 'o_tisu', word: 'Tisu', emoji: '🧻' },
                     { id: 'o_tas', word: 'Tas', emoji: '🎒' },
-                    { id: 'o_piyama', word: 'Piyama', emoji: '🥼' }
+                    { id: 'o_piyama', word: 'Piyama', emoji: '👕' }
                 ]
             },
             {
@@ -490,14 +495,14 @@
                 type: 'tempat',
                 minLevel: 3,
                 items: [
-                    { id: 'k_kamar', word: 'Di Kamar', emoji: '🛏️' },
-                    { id: 'k_toilet', word: 'Di Toilet', emoji: '🚽' },
-                    { id: 'k_meja', word: 'Di Meja', emoji: '🪵' },
-                    { id: 'k_luar', word: 'Di Luar', emoji: '🌳' },
-                    { id: 'k_dalam', word: 'Di Dalam', emoji: '🏠' },
-                    { id: 'k_sekolah', word: 'Di Sekolah', emoji: '🏫' },
-                    { id: 'k_rumah', word: 'Di Rumah', emoji: '🏡' },
-                    { id: 'k_mobil', word: 'Di Mobil', emoji: '🚘' }
+                    { id: 'k_kamar', word: 'Kamar', emoji: '🛏️' },
+                    { id: 'k_toilet', word: 'Toilet', emoji: '🚽' },
+                    { id: 'k_meja', word: 'Meja', emoji: '🪑' },
+                    { id: 'k_luar', word: 'Luar', emoji: '🌳' },
+                    { id: 'k_dalam', word: 'Dalam', emoji: '🏠' },
+                    { id: 'k_sekolah', word: 'Sekolah', emoji: '🏫' },
+                    { id: 'k_rumah', word: 'Rumah', emoji: '🏡' },
+                    { id: 'k_mobil', word: 'Mobil', emoji: '🚘' }
                 ]
             },
             {
@@ -507,7 +512,7 @@
                 minLevel: 3,
                 items: [
                     { id: 'ks_lapar', word: 'Lapar', emoji: '🤤' },
-                    { id: 'ks_haus', word: 'Haus', emoji: '🥵' },
+                    { id: 'ks_haus', word: 'Haus', emoji: '🥤' },
                     { id: 'ks_sakit', word: 'Sakit', emoji: '🤒' },
                     { id: 'ks_capek', word: 'Capek', emoji: '😮‍💨' },
                     { id: 'ks_panas', word: 'Panas', emoji: '🔥' },
@@ -551,7 +556,8 @@
         let currentSentence = [];
         let isEditMode = false;
         let isChildLock = false;
-        let lastClickTime = 0; // Guard Anti-Ketuk Ganda
+        let isImageOnly = safeGetStorage('pecs_img_only', false);
+        let lastClickTime = 0;
         let activeTargetItemId = null;
         
         let wordHistory = safeGetStorage('pecs_history', []);
@@ -614,23 +620,57 @@
 
             if (isEditMode) {
                 btn.classList.add('active-mode');
-                btn.innerHTML = '✅ Selesai Edit';
+                btn.innerHTML = '✅ Selesai';
                 mainPage.classList.add('is-edit-mode');
             } else {
                 btn.classList.remove('active-mode');
-                btn.innerHTML = '⚙️ Edit Papan';
+                btn.innerHTML = '⚙️ Edit';
                 mainPage.classList.remove('is-edit-mode');
             }
         }
 
-        // Mode Kunci Anak (Child Lock)
+        // Pengaturan Mode Gambar Saja dari Sidebar Menu
+        function toggleImageOnlyModeFromMenu() {
+            isImageOnly = !isImageOnly;
+            localStorage.setItem('pecs_img_only', JSON.stringify(isImageOnly));
+            updateImageOnlyState();
+        }
+
+        function updateImageOnlyState() {
+            const label = document.getElementById('img-only-label');
+            if (isImageOnly) {
+                document.body.classList.add('image-only-mode');
+                if (label) {
+                    label.innerText = 'Aktif';
+                    label.style.color = '#10b981';
+                }
+            } else {
+                document.body.classList.remove('image-only-mode');
+                if (label) {
+                    label.innerText = 'Nonaktif';
+                    label.style.color = 'var(--primary)';
+                }
+            }
+        }
+
+        // Redesain Mode Kunci Anak (Child Lock)
         function toggleChildLock() {
             isChildLock = !isChildLock;
+            const lockBtn = document.getElementById('lock-btn');
+
             if (isChildLock) {
                 document.body.classList.add('child-locked');
-                if (isEditMode) toggleEditMode(); // Matikan mode edit jika aktif
+                if (isEditMode) toggleEditMode();
+                if (lockBtn) {
+                    lockBtn.innerHTML = '🔓 Buka';
+                    lockBtn.classList.add('unlocked-style');
+                }
             } else {
                 document.body.classList.remove('child-locked');
+                if (lockBtn) {
+                    lockBtn.innerHTML = '🔒 Kunci';
+                    lockBtn.classList.remove('unlocked-style');
+                }
             }
         }
 
@@ -706,6 +746,7 @@
 
                         const card = document.createElement('div');
                         card.className = `pecs-card ${cat.type}`;
+                        card.id = `card_node_${item.id}`;
                         
                         const hasCustomImg = !!customImages[item.id];
                         const visualContent = hasCustomImg 
@@ -714,6 +755,7 @@
 
                         card.onclick = (e) => {
                             if (!isEditMode) {
+                                triggerCardFlash(`card_node_${item.id}`);
                                 addToSentence(displayWord, defaultEmoji, customImages[item.id]);
                             }
                         };
@@ -737,6 +779,14 @@
                     container.appendChild(catSection);
                 }
             });
+        }
+
+        function triggerCardFlash(elementId) {
+            const elem = document.getElementById(elementId);
+            if (elem) {
+                elem.classList.add('card-active-flash');
+                setTimeout(() => elem.classList.remove('card-active-flash'), 250);
+            }
         }
 
         function deleteCustomCard(itemId, event) {
@@ -854,7 +904,6 @@
             }
         }
 
-        // Penambahan ke Jalur Kalimat dengan Proteksi Ketuk Ganda (Debounce 400ms)
         function addToSentence(word, emoji, customImgUrl) {
             const currentTime = new Date().getTime();
             if (currentTime - lastClickTime < 400) return; 
@@ -886,6 +935,7 @@
                     : `<span class="emoji">${item.emoji}</span>`;
 
                 elem.innerHTML = `
+                    <span class="item-remove-btn" title="Hapus kata ini">×</span>
                     ${visualContent}
                     <span class="word">${item.word}</span>
                 `;
@@ -957,6 +1007,8 @@
                 if (selectTheme) selectTheme.value = savedTheme;
                 changeTheme(savedTheme);
             }
+
+            updateImageOnlyState();
 
             if (userSettings) {
                 const radio = document.querySelector(`input[name="level"][value="${userSettings.level}"]`);
