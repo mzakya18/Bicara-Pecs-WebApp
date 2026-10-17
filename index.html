@@ -362,6 +362,7 @@
                     ℹ️ <em>Pencarian bekerja paling akurat dengan kata kunci Bahasa Inggris. Anda bisa mengetik langsung atau memilih tombol kategori di bawah ini.</em>
                 </p>
                 <div style="display:flex; gap:8px;">
+                    <!-- Event Keydown Enter ditambahkan di sini -->
                     <input type="text" id="arasaac-search-input" placeholder="Ketik kata (misal: drink, food, ball, eat)..." onkeydown="if(event.key==='Enter'){event.preventDefault();searchArasaac();}">
                     <button type="button" class="btn-primary" style="margin:0; width:auto; padding:10px 15px;" onclick="searchArasaac()">Cari</button>
                 </div>
