@@ -91,7 +91,7 @@
         body.child-locked .hide-on-lock { display: none !important; }
         body.image-only-mode .pecs-card .word { display: none !important; }
 
-        #sentence-strip { background-color: var(--card-bg); padding: 12px; border-radius: 12px; min-height: 95px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); margin-bottom: 15px; flex-wrap: wrap; border: 2px dashed var(--border-dashed); transition: 0.3s; }
+        #sentence-strip { background-color: var(--card-bg); padding: 12px; border-radius: 12px; min-height: 95px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); margin-bottom: 10px; flex-wrap: wrap; border: 2px dashed var(--border-dashed); transition: 0.3s; }
         .sentence-item { position: relative; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: var(--card-border); color: var(--text-color); padding: 8px 12px; border-radius: 10px; font-weight: bold; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; transition: 0.2s;}
         .sentence-item:active { transform: scale(0.85); filter: brightness(0.8); }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -339,6 +339,8 @@
         <div id="sentence-strip">
             <span style="color: #94a3b8; width: 100%; text-align: center; font-size: 0.95rem;" id="placeholder-text">Ketuk gambar di bawah untuk menyusun kalimat...</span>
         </div>
+
+        <div id="ai-preview-box" style="margin-bottom: 15px; padding: 12px; background: var(--card-bg); border-radius: 12px; border: 2px solid var(--card-border); display: none; font-size: 0.95rem; font-weight: bold; text-align: center; box-shadow: var(--shadow);"></div>
         
         <div class="controls">
             <button class="btn-speak" onclick="speakSentence()">🔊 Bicara</button>
@@ -357,12 +359,12 @@
             });
         }
 
-        const GEMINI_API_KEY = "AQ.Ab8RN6KiCyzI8jRfffS15Ssnts77IFw_8nQoxwm98-d74CDibA";
+        const GEMINI_API_KEY = "AQ.Ab8RN6LIOeKWBRFNvC4MGH7_ZRKmD5AMmUlBmA3XgupOIcqTrA";
 
         function safeGetStorage(key, defaultValue) {
             try {
                 const item = localStorage.getItem(key);
-                return item ? JSON.parse(item) : defaultValue;
+                return item !== null ? JSON.parse(item) : defaultValue;
             } catch (e) {
                 return defaultValue;
             }
@@ -1041,6 +1043,8 @@
 
             if (currentSentence.length === 0) {
                 strip.innerHTML = '<span style="color: #94a3b8; width: 100%; text-align: center; font-size: 0.95rem;" id="placeholder-text">Ketuk gambar di bawah untuk menyusun kalimat...</span>';
+                const previewBox = document.getElementById('ai-preview-box');
+                if (previewBox) previewBox.style.display = "none";
                 return;
             }
 
@@ -1070,6 +1074,8 @@
 
         function clearSentence() {
             currentSentence = [];
+            const previewBox = document.getElementById('ai-preview-box');
+            if (previewBox) previewBox.style.display = "none";
             updateSentenceStrip();
         }
 
@@ -1113,10 +1119,29 @@
         async function speakSentence() {
             if (currentSentence.length === 0) return;
 
-            let teksBicara = currentSentence.map(item => item.word).join(" ");
+            const mentah = currentSentence.map(item => item.word).join(" ");
+            let teksBicara = mentah;
+            const previewBox = document.getElementById('ai-preview-box');
 
             if (isAiEnabled) {
+                if (previewBox) {
+                    previewBox.style.display = "block";
+                    previewBox.style.color = "var(--primary)";
+                    previewBox.innerText = "🤖 AI sedang menyusun kalimat...";
+                }
+
                 teksBicara = await prosesKalimatDenganAI(currentSentence);
+
+                if (previewBox) {
+                    previewBox.style.color = "#10b981";
+                    previewBox.innerText = '🤖 Hasil AI: "' + teksBicara + '"';
+                }
+            } else {
+                if (previewBox) {
+                    previewBox.style.display = "block";
+                    previewBox.style.color = "var(--text-color)";
+                    previewBox.innerText = '🗣️ Mode Biasa: "' + mentah + '"';
+                }
             }
 
             speakText(teksBicara);
