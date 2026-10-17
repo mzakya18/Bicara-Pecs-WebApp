@@ -191,7 +191,6 @@
         .cat-chip { background: var(--card-border); color: var(--text-color); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; border: 1px solid var(--border-dashed); font-weight: bold; }
         .cat-chip:hover { background: var(--primary); color: white; }
 
-        /* Style Layar Kunci Keamanan Utama */
         #lock-screen-modal {
             display: flex;
             position: fixed;
@@ -254,7 +253,8 @@
         </div>
     </div>
 
-    <input type="file" id="global-file-input" accept="image/*" style="display: none;" onchange="handleImageSelected(event)">
+    <!-- Elemen File Input Tanpa Event yang Tidak Terpakai -->
+    <input type="file" id="global-file-input" accept="image/*" style="display: none;">
 
     <button id="btn-scroll-top" onclick="scrollToTop()" title="Kembali ke atas">⬆️</button>
 
@@ -363,7 +363,7 @@
                     ℹ️ <em>Pencarian bekerja paling akurat dengan kata kunci Bahasa Inggris. Anda bisa mengetik langsung atau memilih tombol kategori di bawah ini.</em>
                 </p>
                 <div style="display:flex; gap:8px;">
-                    <input type="text" id="arasaac-search-input" placeholder="Ketik kata (misal: drink, food, ball, eat)...">
+                    <input type="text" id="arasaac-search-input" placeholder="Ketik kata (misal: drink, food, ball, eat)..." onkeydown="if(event.key==='Enter'){event.preventDefault();searchArasaac();}">
                     <button type="button" class="btn-primary" style="margin:0; width:auto; padding:10px 15px;" onclick="searchArasaac()">Cari</button>
                 </div>
                 
@@ -498,7 +498,6 @@
             });
         }
 
-        // --- SISTEM KEAMANAN & PENGACAKAN SHA-256 ---
         const DEFAULT_PASS_PLAIN = "bicarapecsby@zakymza18";
 
         async function hashText(text) {
