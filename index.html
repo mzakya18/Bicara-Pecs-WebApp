@@ -159,7 +159,7 @@
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay-bg); z-index: 105; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; }
         .modal.open { display: flex; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 15px; padding: 20px; box-shadow: var(--shadow); box-sizing: border-box; }
+        .modal-content { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 15px; padding: 20px; box-shadow: var(--shadow); box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -176,6 +176,10 @@
         <ul class="sidebar-menu">
             <li onclick="goToPage('page-main'); closeMenu();"><span>🏠 Papan Utama</span></li>
             <li onclick="openAddCardModal(); closeMenu();"><span>➕ Tambah Kartu PECS</span></li>
+            <li onclick="toggleAiModeFromMenu()">
+                <span>🤖 Fitur AI Kalimat</span>
+                <strong id="ai-status-label" style="color:#10b981; font-size:0.85rem;">Aktif (ON)</strong>
+            </li>
             <li onclick="toggleImageOnlyModeFromMenu()">
                 <span>🖼️ Mode Gambar Saja</span>
                 <strong id="img-only-label" style="color:var(--primary); font-size:0.85rem;">Nonaktif</strong>
@@ -226,7 +230,16 @@
             </div>
 
             <div class="form-group">
-                <label>Upload Gambar / Foto <span style="color:#ef4444;">*</span>:</label>
+                <label>🔍 Cari Piktogram ARASAAC (Klinis):</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="arasaac-search-input" placeholder="Ketik kata (misal: makan, air)...">
+                    <button type="button" class="btn-primary" style="margin:0; width:auto; padding:10px 15px;" onclick="searchArasaac()">Cari</button>
+                </div>
+                <div id="arasaac-results" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:10px; max-height:160px; overflow-y:auto;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Atau Upload Gambar / Foto Pribadi:</label>
                 <input type="file" id="new-card-file" accept="image/*" style="width:100%;">
             </div>
 
@@ -344,6 +357,8 @@
             });
         }
 
+        const GEMINI_API_KEY = "AQ.Ab8RN6KiCyzI8jRfffS15Ssnts77IFw_8nQoxwm98-d74CDibA";
+
         function safeGetStorage(key, defaultValue) {
             try {
                 const item = localStorage.getItem(key);
@@ -389,6 +404,17 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+
+        async function urlToBase64(url) {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
         }
 
         const basePecsDatabase = [
@@ -560,6 +586,8 @@
         
         let isChildLock = safeGetStorage('pecs_child_lock', false);
         let isImageOnly = safeGetStorage('pecs_img_only', false);
+        let isAiEnabled = safeGetStorage('pecs_ai_enabled', true);
+        let selectedArasaacUrl = null;
         let lastClickTime = 0;
         let activeTargetItemId = null;
         
@@ -629,6 +657,25 @@
                 btn.classList.remove('active-mode');
                 btn.innerHTML = '⚙️ Edit';
                 mainPage.classList.remove('is-edit-mode');
+            }
+        }
+
+        function toggleAiModeFromMenu() {
+            isAiEnabled = !isAiEnabled;
+            localStorage.setItem('pecs_ai_enabled', JSON.stringify(isAiEnabled));
+            updateAiToggleUI();
+        }
+
+        function updateAiToggleUI() {
+            const label = document.getElementById('ai-status-label');
+            if (label) {
+                if (isAiEnabled) {
+                    label.innerText = 'Aktif (ON)';
+                    label.style.color = '#10b981';
+                } else {
+                    label.innerText = 'Nonaktif (OFF)';
+                    label.style.color = '#ef4444';
+                }
             }
         }
 
@@ -818,9 +865,63 @@
             document.getElementById('add-card-modal').classList.remove('open');
             document.getElementById('new-card-text').value = '';
             document.getElementById('new-card-file').value = '';
+            document.getElementById('arasaac-search-input').value = '';
+            document.getElementById('arasaac-results').innerHTML = '';
+            selectedArasaacUrl = null;
         }
 
-        function submitNewCustomCard() {
+        async function searchArasaac() {
+            const query = document.getElementById('arasaac-search-input').value.trim();
+            const resultsContainer = document.getElementById('arasaac-results');
+            if (!query) {
+                alert('Masukkan kata kunci pencarian ARASAAC!');
+                return;
+            }
+
+            resultsContainer.innerHTML = '<p style="grid-column: span 4; font-size:0.85rem; text-align:center; color:var(--text-color);">Mencari piktogram...</p>';
+
+            try {
+                let response = await fetch(`https://api.arasaac.org/v1/pictograms/id/search/${encodeURIComponent(query)}`);
+                let data = await response.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    response = await fetch(`https://api.arasaac.org/v1/pictograms/en/search/${encodeURIComponent(query)}`);
+                    data = await response.json();
+                }
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    resultsContainer.innerHTML = '<p style="grid-column: span 4; font-size:0.85rem; text-align:center; color:#ef4444;">Piktogram tidak ditemukan. Coba kata kunci lain.</p>';
+                    return;
+                }
+
+                resultsContainer.innerHTML = '';
+                data.slice(0, 8).forEach(item => {
+                    const imgUrl = `https://static.arasaac.org/pictograms/${item._id}/${item._id}_300.png`;
+                    const imgElem = document.createElement('img');
+                    imgElem.src = imgUrl;
+                    imgElem.style.width = '100%';
+                    imgElem.style.aspectRatio = '1/1';
+                    imgElem.style.objectFit = 'contain';
+                    imgElem.style.border = '2px solid var(--card-border)';
+                    imgElem.style.borderRadius = '8px';
+                    imgElem.style.cursor = 'pointer';
+                    imgElem.style.background = '#fff';
+
+                    imgElem.onclick = () => {
+                        document.querySelectorAll('#arasaac-results img').forEach(el => el.style.borderColor = 'var(--card-border)');
+                        imgElem.style.borderColor = 'var(--primary)';
+                        selectedArasaacUrl = imgUrl;
+                    };
+
+                    resultsContainer.appendChild(imgElem);
+                });
+            } catch (err) {
+                console.error('Gagal mengambil gambar ARASAAC:', err);
+                resultsContainer.innerHTML = '<p style="grid-column: span 4; font-size:0.85rem; text-align:center; color:#ef4444;">Gagal terhubung ke server ARASAAC.</p>';
+            }
+        }
+
+        async function submitNewCustomCard() {
             const catKey = document.getElementById('new-card-category').value;
             const textVal = document.getElementById('new-card-text').value.trim();
             const fileInput = document.getElementById('new-card-file');
@@ -830,33 +931,47 @@
                 return;
             }
 
+            if (selectedArasaacUrl) {
+                try {
+                    const base64Img = await urlToBase64(selectedArasaacUrl);
+                    saveCardToStorage(catKey, textVal, base64Img);
+                    return;
+                } catch (e) {
+                    console.error("Gagal mengonversi gambar ARASAAC:", e);
+                }
+            }
+
             if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Gambar/Foto kartu wajib diupload! Tidak boleh kosong.');
+                alert('Pilih piktogram ARASAAC atau upload file foto terlebih dahulu!');
                 return;
             }
 
             compressImage(fileInput.files[0], function(compressedBase64) {
-                const newCardId = 'custom_card_' + Date.now();
-
-                const newCardObj = {
-                    id: newCardId,
-                    catKey: catKey,
-                    word: textVal,
-                    imageUrl: compressedBase64
-                };
-
-                userCards.push(newCardObj);
-                try {
-                    localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
-                } catch (err) {
-                    alert('Memori penyimpanan penuh. Coba hapus beberapa kartu lama.');
-                    return;
-                }
-
-                closeAddCardModal();
-                renderCategories();
-                alert('Kartu PECS baru berhasil ditambahkan!');
+                saveCardToStorage(catKey, textVal, compressedBase64);
             });
+        }
+
+        function saveCardToStorage(catKey, textVal, imageUrl) {
+            const newCardId = 'custom_card_' + Date.now();
+
+            const newCardObj = {
+                id: newCardId,
+                catKey: catKey,
+                word: textVal,
+                imageUrl: imageUrl
+            };
+
+            userCards.push(newCardObj);
+            try {
+                localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
+            } catch (err) {
+                alert('Memori penyimpanan penuh. Coba hapus beberapa kartu lama.');
+                return;
+            }
+
+            closeAddCardModal();
+            renderCategories();
+            alert('Kartu PECS baru berhasil ditambahkan!');
         }
 
         function editCardText(itemId, currentText, event) {
@@ -958,10 +1073,53 @@
             updateSentenceStrip();
         }
 
-        function speakSentence() {
+        async function prosesKalimatDenganAI(susunanKata) {
+            if (!susunanKata || susunanKata.length === 0) return "";
+
+            const mentah = susunanKata.map(item => item.word).join(" ");
+
+            if (!GEMINI_API_KEY) {
+                return mentah;
+            }
+
+            const promptUtama = `Kamu adalah asisten komunikasi anak berkebutuhan khusus. Ubah susunan kata PECS berikut menjadi 1 kalimat bahasa Indonesia yang alami, singkat, dan sopan untuk diucapkan: "${mentah}". Hanya kembalikan teks kalimat hasilnya saja tanpa penjelasan tambahan atau tanda kutip.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: promptUtama }]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
+                    return data.candidates[0].content.parts[0].text.trim();
+                } else {
+                    return mentah;
+                }
+            } catch (error) {
+                console.error("Gagal terhubung ke AI Gemini:", error);
+                return mentah;
+            }
+        }
+
+        async function speakSentence() {
             if (currentSentence.length === 0) return;
-            const fullText = currentSentence.map(item => item.word).join(' ');
-            speakText(fullText);
+
+            let teksBicara = currentSentence.map(item => item.word).join(" ");
+
+            if (isAiEnabled) {
+                teksBicara = await prosesKalimatDenganAI(currentSentence);
+            }
+
+            speakText(teksBicara);
         }
 
         function speakText(text) {
@@ -1013,6 +1171,7 @@
                 changeTheme(savedTheme);
             }
 
+            updateAiToggleUI();
             updateImageOnlyState();
             updateChildLockUI();
 
