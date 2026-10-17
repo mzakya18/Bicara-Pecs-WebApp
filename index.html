@@ -72,7 +72,7 @@
 
         .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-color); line-height: 1.4; }
-        .form-group select, .form-group input[type="text"] { width: 100%; padding: 12px; border: 2px solid var(--card-border); border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); box-sizing: border-box; }
+        .form-group select, .form-group input[type="text"], .form-group input[type="password"] { width: 100%; padding: 12px; border: 2px solid var(--card-border); border-radius: 8px; font-size: 1rem; background: var(--card-bg); color: var(--text-color); box-sizing: border-box; }
         
         .radio-group { display: flex; flex-direction: column; gap: 10px; }
         .radio-option { display: flex; align-items: flex-start; gap: 10px; background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--card-border); cursor: pointer; transition: 0.2s; }
@@ -190,9 +190,69 @@
         
         .cat-chip { background: var(--card-border); color: var(--text-color); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; border: 1px solid var(--border-dashed); font-weight: bold; }
         .cat-chip:hover { background: var(--primary); color: white; }
+
+        /* Style Layar Kunci Keamanan Utama */
+        #lock-screen-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .lock-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 380px;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            text-align: center;
+            border: 2px solid var(--card-border);
+        }
+
+        .lock-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            border: 2px solid var(--card-border);
+            border-radius: 10px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            text-align: center;
+            box-sizing: border-box;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
     </style>
 </head>
 <body>
+
+    <!-- Layar Kunci Keamanan Utama -->
+    <div id="lock-screen-modal">
+        <div class="lock-card">
+            <h1 style="font-size: 2.8rem; margin: 0 0 10px 0;">🔐</h1>
+            <h3 id="lock-title" style="margin: 0; color: var(--text-color);">Aplikasi Terkunci</h3>
+            <p id="lock-desc" style="font-size: 0.9rem; color: #64748b; margin-top: 8px; line-height: 1.4;">
+                Masukkan sandi default awal untuk membuka aplikasi.
+            </p>
+
+            <form onsubmit="event.preventDefault(); checkUnlockPassword();">
+                <input type="password" id="lock-input-pass" class="lock-input" placeholder="Masukkan Sandi / PIN" autocomplete="off">
+                <div id="lock-error-msg" style="color: #ef4444; font-size: 0.85rem; display: none; margin-bottom: 10px; font-weight: bold;">
+                    Sandi atau PIN salah, silakan coba lagi.
+                </div>
+                <button type="button" class="btn-primary" onclick="checkUnlockPassword()">Buka Aplikasi</button>
+            </form>
+        </div>
+    </div>
 
     <input type="file" id="global-file-input" accept="image/*" style="display: none;" onchange="handleImageSelected(event)">
 
@@ -206,6 +266,7 @@
         <ul class="sidebar-menu">
             <li onclick="goToPage('page-main'); closeMenu();"><span>🏠 Papan Utama</span></li>
             <li onclick="openAddCardModal(); closeMenu();"><span>➕ Tambah Kartu PECS</span></li>
+            <li onclick="openPinConfigModal(); closeMenu();"><span>🔐 Pengaturan Kunci / PIN</span></li>
             <li onclick="toggleImageOnlyModeFromMenu()">
                 <span>🖼️ Mode Gambar Saja</span>
                 <strong id="img-only-label" style="color:var(--primary); font-size:0.85rem;">Nonaktif</strong>
@@ -226,6 +287,47 @@
 
         <div style="margin-top: 30px; text-align: center; font-size: 0.85rem; color: #64748b;">
             Bicara PECS by :<br><strong style="color:var(--text-color);">Muhammad Zaky Akbar</strong>
+        </div>
+    </div>
+
+    <!-- Modal Pengaturan PIN / Kunci Keamanan -->
+    <div class="modal" id="pin-config-modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 8px;">🔐 Pengaturan Kunci Aplikasi</h3>
+            
+            <div class="form-group">
+                <label>Pilih Metode Keamanan:</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="lock-mode-choice" value="pin" onchange="togglePinInputGroup(true)">
+                        <span><strong>Gunakan PIN Baru:</strong> Kunci aplikasi dengan 6 angka/PIN pilihan Anda.</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="lock-mode-choice" value="none" onchange="togglePinInputGroup(false)">
+                        <span><strong>Tanpa Kunci / PIN:</strong> Masuk langsung tanpa kunci sampai aplikasi di-uninstall.</span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="pin-input-group" class="form-group" style="display: none;">
+                <label>Buat PIN Baru (Minimal 4-6 angka):</label>
+                <input type="password" id="new-pin-input" placeholder="Masukkan PIN Baru" maxlength="8">
+                <label style="margin-top: 10px;">Konfirmasi PIN Baru:</label>
+                <input type="password" id="confirm-pin-input" placeholder="Ketik Ulang PIN Baru" maxlength="8">
+            </div>
+
+            <div id="timeout-input-group" class="form-group" style="display: none;">
+                <label>Minta PIN Lagi Saat Ditinggalkan/Reload:</label>
+                <select id="timeout-select">
+                    <option value="0">Langsung Terkunci (Setiap Reload/Buka)</option>
+                    <option value="1">Setelah 1 Menit</option>
+                    <option value="3">Setelah 3 Menit</option>
+                    <option value="5">Setelah 5 Menit</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" onclick="savePinConfiguration()">Simpan Pengaturan</button>
+            <button class="btn-secondary" id="btn-cancel-pin-config" onclick="closePinConfigModal()">Batal</button>
         </div>
     </div>
 
@@ -394,6 +496,205 @@
                     registration.update();
                 }).catch(err => console.log('ServiceWorker gagal didaftarkan: ', err));
             });
+        }
+
+        // --- SISTEM KEAMANAN & PENGACAKAN SHA-256 ---
+        const DEFAULT_PASS_PLAIN = "bicarapecsby@zakymza18";
+
+        async function hashText(text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function updateLastActiveTimestamp() {
+            localStorage.setItem('pecs_last_active', Date.now().toString());
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                updateLastActiveTimestamp();
+            }
+        });
+        window.addEventListener('beforeunload', updateLastActiveTimestamp);
+
+        async function evaluateAppLock() {
+            let lockType = localStorage.getItem('pecs_lock_type') || 'default';
+            let storedHash = localStorage.getItem('pecs_pass_hash');
+            const lockModal = document.getElementById('lock-screen-modal');
+            const lockTitle = document.getElementById('lock-title');
+            const lockDesc = document.getElementById('lock-desc');
+
+            if (!storedHash) {
+                storedHash = await hashText(DEFAULT_PASS_PLAIN);
+                localStorage.setItem('pecs_pass_hash', storedHash);
+                localStorage.setItem('pecs_lock_type', 'default');
+                lockType = 'default';
+            }
+
+            if (lockType === 'none') {
+                if (lockModal) lockModal.style.display = 'none';
+                return;
+            }
+
+            if (lockType === 'default') {
+                if (lockTitle) lockTitle.innerText = "Aplikasi Terkunci";
+                if (lockDesc) lockDesc.innerText = "Masukkan sandi default awal untuk membuka aplikasi.";
+                if (lockModal) lockModal.style.display = 'flex';
+                return;
+            }
+
+            if (lockType === 'pin') {
+                const timeoutMinutes = parseInt(localStorage.getItem('pecs_timeout_min') || '0', 10);
+                const lastActive = parseInt(localStorage.getItem('pecs_last_active') || '0', 10);
+                const now = Date.now();
+
+                let shouldLock = false;
+                if (timeoutMinutes === 0) {
+                    shouldLock = true;
+                } else if (lastActive > 0) {
+                    const elapsedMinutes = (now - lastActive) / (1000 * 60);
+                    if (elapsedMinutes >= timeoutMinutes) {
+                        shouldLock = true;
+                    }
+                }
+
+                if (shouldLock) {
+                    if (lockTitle) lockTitle.innerText = "Kunci PIN Aktif";
+                    if (lockDesc) lockDesc.innerText = "Masukkan PIN Anda untuk melanjutkan.";
+                    if (lockModal) lockModal.style.display = 'flex';
+                } else {
+                    if (lockModal) lockModal.style.display = 'none';
+                }
+            }
+        }
+
+        async function checkUnlockPassword() {
+            const inputVal = document.getElementById('lock-input-pass').value.trim();
+            const errorMsg = document.getElementById('lock-error-msg');
+            const storedHash = localStorage.getItem('pecs_pass_hash');
+
+            if (!inputVal) {
+                if (errorMsg) {
+                    errorMsg.innerText = "Harap masukkan sandi atau PIN!";
+                    errorMsg.style.display = 'block';
+                }
+                return;
+            }
+
+            const inputHash = await hashText(inputVal);
+
+            if (inputHash === storedHash) {
+                if (errorMsg) errorMsg.style.display = 'none';
+                document.getElementById('lock-input-pass').value = '';
+                document.getElementById('lock-screen-modal').style.display = 'none';
+                updateLastActiveTimestamp();
+
+                const lockType = localStorage.getItem('pecs_lock_type') || 'default';
+                if (lockType === 'default') {
+                    openPinConfigModal(true);
+                }
+            } else {
+                if (errorMsg) {
+                    errorMsg.innerText = "Sandi atau PIN salah, silakan coba lagi.";
+                    errorMsg.style.display = 'block';
+                }
+            }
+        }
+
+        function openPinConfigModal(isFirstSetup = false) {
+            const modal = document.getElementById('pin-config-modal');
+            const cancelBtn = document.getElementById('btn-cancel-pin-config');
+            const currentLockType = localStorage.getItem('pecs_lock_type') || 'default';
+            const currentTimeout = localStorage.getItem('pecs_timeout_min') || '0';
+
+            if (isFirstSetup) {
+                if (cancelBtn) cancelBtn.style.display = 'none';
+            } else {
+                if (cancelBtn) cancelBtn.style.display = 'block';
+            }
+
+            const pinRadio = document.querySelector('input[name="lock-mode-choice"][value="pin"]');
+            const noneRadio = document.querySelector('input[name="lock-mode-choice"][value="none"]');
+
+            if (currentLockType === 'none') {
+                if (noneRadio) noneRadio.checked = true;
+                togglePinInputGroup(false);
+            } else {
+                if (pinRadio) pinRadio.checked = true;
+                togglePinInputGroup(true);
+            }
+
+            document.getElementById('timeout-select').value = currentTimeout;
+            document.getElementById('new-pin-input').value = '';
+            document.getElementById('confirm-pin-input').value = '';
+
+            modal.classList.add('open');
+        }
+
+        function closePinConfigModal() {
+            const lockType = localStorage.getItem('pecs_lock_type') || 'default';
+            if (lockType === 'default') {
+                alert('Anda wajib memilih pengaturan PIN atau Tanpa Kunci untuk melanjutkan.');
+                return;
+            }
+            document.getElementById('pin-config-modal').classList.remove('open');
+        }
+
+        function togglePinInputGroup(showPinGroup) {
+            const pinGroup = document.getElementById('pin-input-group');
+            const timeoutGroup = document.getElementById('timeout-input-group');
+            if (showPinGroup) {
+                if (pinGroup) pinGroup.style.display = 'block';
+                if (timeoutGroup) timeoutGroup.style.display = 'block';
+            } else {
+                if (pinGroup) pinGroup.style.display = 'none';
+                if (timeoutGroup) timeoutGroup.style.display = 'none';
+            }
+        }
+
+        async function savePinConfiguration() {
+            const selectedMode = document.querySelector('input[name="lock-mode-choice"]:checked');
+            if (!selectedMode) {
+                alert('Pilih salah satu metode keamanan!');
+                return;
+            }
+
+            const modeValue = selectedMode.value;
+
+            if (modeValue === 'none') {
+                localStorage.setItem('pecs_lock_type', 'none');
+                document.getElementById('pin-config-modal').classList.remove('open');
+                alert('Aplikasi sekarang diatur TANPA PIN.');
+                return;
+            }
+
+            if (modeValue === 'pin') {
+                const pinVal = document.getElementById('new-pin-input').value.trim();
+                const confirmVal = document.getElementById('confirm-pin-input').value.trim();
+                const timeoutVal = document.getElementById('timeout-select').value;
+
+                if (!pinVal || pinVal.length < 4) {
+                    alert('PIN baru minimal harus 4 - 6 angka!');
+                    return;
+                }
+
+                if (pinVal !== confirmVal) {
+                    alert('Konfirmasi PIN tidak cocok! Silakan cek kembali.');
+                    return;
+                }
+
+                const newHash = await hashText(pinVal);
+                localStorage.setItem('pecs_pass_hash', newHash);
+                localStorage.setItem('pecs_lock_type', 'pin');
+                localStorage.setItem('pecs_timeout_min', timeoutVal);
+
+                updateLastActiveTimestamp();
+                document.getElementById('pin-config-modal').classList.remove('open');
+                alert('PIN baru berhasil disimpan dan diaktifkan!');
+            }
         }
 
         const idToEnDict = {
@@ -1212,13 +1513,15 @@
             }).join('');
         }
 
-        window.onload = () => {
+        window.onload = async () => {
             const savedTheme = localStorage.getItem('pecs_theme');
             if (savedTheme) {
                 const selectTheme = document.getElementById('theme-select');
                 if (selectTheme) selectTheme.value = savedTheme;
                 changeTheme(savedTheme);
             }
+
+            await evaluateAppLock();
 
             updateImageOnlyState();
             updateChildLockUI();
