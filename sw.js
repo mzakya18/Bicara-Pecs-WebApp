@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bicara-pecs-v10';
+const CACHE_NAME = 'bicara-pecs-v11';
 
 const urlsToCache = [
   './',
