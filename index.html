@@ -273,6 +273,7 @@
             <li onclick="goToPage('page-history'); renderHistory(); closeMenu();"><span>⏱️ Riwayat Kata (24 Jam)</span></li>
             <li onclick="goToPage('page-assessment'); closeMenu();"><span>📝 Tentukan Kemampuan</span></li>
             <li onclick="goToPage('page-references'); closeMenu();"><span>📚 Dasar Referensi</span></li>
+            <li onclick="openAboutModal(); closeMenu();"><span>ℹ️ Tentang & Tim Support</span></li>
             <li onclick="resetToDefaultSettings()" style="color: #ef4444; font-weight: bold;"><span>🔄 Reset Pengaturan Awal</span></li>
         </ul>
         
@@ -386,6 +387,35 @@
 
             <button class="btn-primary" id="btn-save-card" onclick="submitNewCustomCard()">Simpan Kartu</button>
             <button class="btn-secondary" onclick="closeAddCardModal()">Batal</button>
+        </div>
+    </div>
+
+    <!-- Modal Tentang & Tim Support -->
+    <div class="modal" id="about-modal">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 8px; color: var(--text-color);">
+                ℹ️ Tentang Bicara PECS WebApp
+            </h3>
+            
+            <p style="font-size: 0.95rem; color: var(--text-color); line-height: 1.5; margin-top: 15px;">
+                Aplikasi PWA Media Komunikasi Visual (AAC) berbasis PECS untuk membantu anak berkebutuhan khusus dalam berkomunikasi.
+            </p>
+
+            <div style="background: var(--bg-color); padding: 12px; border-radius: 10px; border: 1px solid var(--card-border); margin: 15px 0; text-align: left; font-size: 0.9rem;">
+                <p style="margin: 0 0 8px 0;"><strong>👨‍💻 Pengembang:</strong></p>
+                <a href="https://www.threads.net/@zakymza" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                    🌀 @zakymza (Muhammad Zaky Akbar)
+                </a>
+
+                <hr style="border: 0; border-top: 1px dashed var(--card-border); margin: 10px 0;">
+
+                <p style="margin: 0 0 8px 0;"><strong>🌐 Dukungan Domain & Sponsor:</strong></p>
+                <a href="https://www.threads.net/@rochiyat" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                    🌐 @rochiyat (Penyedia Domain Gratis)
+                </a>
+            </div>
+
+            <button class="btn-primary" onclick="closeAboutModal()">Tutup</button>
         </div>
     </div>
 
@@ -995,6 +1025,16 @@
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('sidebar').classList.remove('open');
         }
+
+        // --- FUNGSI MODAL ABOUT DITAMBAHKAN DI SINI --- //
+        function openAboutModal() {
+            document.getElementById('about-modal').classList.add('open');
+        }
+
+        function closeAboutModal() {
+            document.getElementById('about-modal').classList.remove('open');
+        }
+        // ---------------------------------------------- //
 
         function changeTheme(theme) {
             if (theme === 'dark') {
