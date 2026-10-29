@@ -2,7 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://static.arasaac.org; connect-src 'self' https://api.arasaac.org https://static.arasaac.org; font-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -110,7 +111,7 @@
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .category.collapsed .grid { display: none; }
 
-        .pecs-card { background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 16px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease; box-sizing: border-box; }
+        .pecs-card { font-family: inherit; background-color: var(--card-bg); border: 3px solid var(--card-border); border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer; font-weight: bold; font-size: 16px; color: #1e293b; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; position: relative; transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease; box-sizing: border-box; }
         .pecs-card:active { transform: scale(0.92); filter: brightness(0.7) contrast(1.2); }
         .pecs-card.card-active-flash { box-shadow: 0 0 0 6px #10b981 !important; transform: scale(0.95); }
         .pecs-card .emoji { font-size: 58px; display: block; margin: 0 auto 6px; line-height: 1; }
@@ -243,13 +244,14 @@
                 Masukkan sandi default awal untuk membuka aplikasi.
             </p>
 
-            <form onsubmit="event.preventDefault(); checkUnlockPassword();">
-                <input type="password" id="lock-input-pass" class="lock-input" placeholder="Masukkan Sandi / PIN" autocomplete="off">
+            <form id="lock-form" onsubmit="event.preventDefault(); checkUnlockPassword();">
+                <input type="password" id="lock-input-pass" class="lock-input" placeholder="Masukkan PIN" inputmode="numeric" maxlength="6" autocomplete="off">
                 <div id="lock-error-msg" style="color: #ef4444; font-size: 0.85rem; display: none; margin-bottom: 10px; font-weight: bold;">
                     Sandi atau PIN salah, silakan coba lagi.
                 </div>
                 <button type="button" class="btn-primary" onclick="checkUnlockPassword()">Buka Aplikasi</button>
             </form>
+            <button type="button" id="btn-setup-lock" class="btn-primary" style="display:none" onclick="openPinConfigModal(true)">Atur Kunci Sekarang</button>
         </div>
     </div>
 
@@ -310,10 +312,10 @@
             </div>
 
             <div id="pin-input-group" class="form-group" style="display: none;">
-                <label>Buat PIN Baru (Minimal 4-6 angka):</label>
-                <input type="password" id="new-pin-input" placeholder="Masukkan PIN Baru" maxlength="8">
+                <label>Buat PIN Baru (4–6 angka):</label>
+                <input type="password" id="new-pin-input" placeholder="Masukkan PIN Baru" inputmode="numeric" maxlength="6">
                 <label style="margin-top: 10px;">Konfirmasi PIN Baru:</label>
-                <input type="password" id="confirm-pin-input" placeholder="Ketik Ulang PIN Baru" maxlength="8">
+                <input type="password" id="confirm-pin-input" placeholder="Ketik Ulang PIN Baru" inputmode="numeric" maxlength="6">
             </div>
 
             <div id="timeout-input-group" class="form-group" style="display: none;">
@@ -440,8 +442,8 @@
             </div>
             
             <div class="disclaimer">
-                <strong>🛡️ 100% Aman, Offline & Cepat</strong><br>
-                Webapp ini bisa diinstal ke HP Anda. Semua data aman di perangkat.
+                <strong>🛡️ Data Tersimpan di Perangkat</strong><br>
+                Webapp ini bisa diinstal ke HP Anda dan dapat digunakan offline setelah pertama kali dibuka. Data kartu dan riwayat tidak disimpan di server kami.
             </div>
             
             <button class="btn-primary" onclick="goToPage('page-assessment')">Ayo Mulai</button>
@@ -528,14 +530,38 @@
             });
         }
 
-        const DEFAULT_PASS_PLAIN = "bicarapecsby@zakymza18";
+        const LOCK_ITERATIONS = 200000;
+        let failedPinAttempts = 0;
+        let pinLockoutUntil = 0;
 
-        async function hashText(text) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(text);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        function bytesToHex(buf) {
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function hexToBytes(hex) {
+            return Uint8Array.from(hex.match(/.{1,2}/g).map(h => parseInt(h, 16)));
+        }
+
+        async function derivePinHash(pin, saltHex) {
+            const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits(
+                { name: 'PBKDF2', salt: hexToBytes(saltHex), iterations: LOCK_ITERATIONS, hash: 'SHA-256' },
+                keyMaterial, 256);
+            return bytesToHex(bits);
+        }
+
+        async function storePin(pin) {
+            const saltHex = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+            const hash = await derivePinHash(pin, saltHex);
+            localStorage.setItem('pecs_pin_salt', saltHex);
+            localStorage.setItem('pecs_pass_hash', hash);
+        }
+
+        async function verifyPin(pin) {
+            const saltHex = localStorage.getItem('pecs_pin_salt');
+            const storedHash = localStorage.getItem('pecs_pass_hash');
+            if (!saltHex || !storedHash) return false;
+            return (await derivePinHash(pin, saltHex)) === storedHash;
         }
 
         function updateLastActiveTimestamp() {
@@ -545,90 +571,91 @@
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
                 updateLastActiveTimestamp();
+            } else if (document.visibilityState === 'visible' && localStorage.getItem('pecs_lock_type') === 'pin') {
+                evaluateAppLock();
             }
         });
         window.addEventListener('beforeunload', updateLastActiveTimestamp);
 
-        async function evaluateAppLock() {
-            let lockType = localStorage.getItem('pecs_lock_type') || 'default';
-            let storedHash = localStorage.getItem('pecs_pass_hash');
+        function evaluateAppLock() {
+            let lockType = localStorage.getItem('pecs_lock_type') || 'unset';
+            // Migrasi: data versi lama (sandi default / hash tanpa salt) dipaksa setup ulang.
+            if (lockType === 'pin' && !localStorage.getItem('pecs_pin_salt')) lockType = 'unset';
+            if (lockType !== 'none' && lockType !== 'pin') lockType = 'unset';
             const lockModal = document.getElementById('lock-screen-modal');
             const lockTitle = document.getElementById('lock-title');
             const lockDesc = document.getElementById('lock-desc');
+            const lockForm = document.getElementById('lock-form');
+            const setupBtn = document.getElementById('btn-setup-lock');
+            const pinInput = document.getElementById('lock-input-pass');
 
-            if (!storedHash) {
-                storedHash = await hashText(DEFAULT_PASS_PLAIN);
-                localStorage.setItem('pecs_pass_hash', storedHash);
-                localStorage.setItem('pecs_lock_type', 'default');
-                lockType = 'default';
-            }
+            const show = (title, desc, pinMode) => {
+                lockTitle.innerText = title;
+                lockDesc.innerText = desc;
+                lockForm.style.display = pinMode ? '' : 'none';
+                setupBtn.style.display = pinMode ? 'none' : '';
+                lockModal.style.display = 'flex';
+            };
 
             if (lockType === 'none') {
-                if (lockModal) lockModal.style.display = 'none';
+                lockModal.style.display = 'none';
                 return;
             }
 
-            if (lockType === 'default') {
-                if (lockTitle) lockTitle.innerText = "Aplikasi Terkunci";
-                if (lockDesc) lockDesc.innerText = "Masukkan sandi default awal untuk membuka aplikasi.";
-                if (lockModal) lockModal.style.display = 'flex';
+            if (lockType === 'unset') {
+                show('Atur Kunci Aplikasi', 'Pilih PIN atau tanpa kunci sebelum menggunakan aplikasi.', false);
                 return;
             }
 
-            if (lockType === 'pin') {
-                const timeoutMinutes = parseInt(localStorage.getItem('pecs_timeout_min') || '0', 10);
-                const lastActive = parseInt(localStorage.getItem('pecs_last_active') || '0', 10);
-                const now = Date.now();
+            const timeoutMinutes = parseInt(localStorage.getItem('pecs_timeout_min') || '0', 10);
+            const lastActive = parseInt(localStorage.getItem('pecs_last_active') || '0', 10);
+            const elapsedMinutes = (Date.now() - lastActive) / 60000;
+            const shouldLock = timeoutMinutes === 0 || (lastActive > 0 && elapsedMinutes >= timeoutMinutes);
 
-                let shouldLock = false;
-                if (timeoutMinutes === 0) {
-                    shouldLock = true;
-                } else if (lastActive > 0) {
-                    const elapsedMinutes = (now - lastActive) / (1000 * 60);
-                    if (elapsedMinutes >= timeoutMinutes) {
-                        shouldLock = true;
-                    }
-                }
-
-                if (shouldLock) {
-                    if (lockTitle) lockTitle.innerText = "Kunci PIN Aktif";
-                    if (lockDesc) lockDesc.innerText = "Masukkan PIN Anda untuk melanjutkan.";
-                    if (lockModal) lockModal.style.display = 'flex';
-                } else {
-                    if (lockModal) lockModal.style.display = 'none';
-                }
+            if (shouldLock) {
+                pinInput.value = '';
+                show('Kunci PIN Aktif', 'Masukkan PIN Anda untuk melanjutkan.', true);
+                pinInput.focus();
+            } else {
+                lockModal.style.display = 'none';
             }
         }
 
         async function checkUnlockPassword() {
-            const inputVal = document.getElementById('lock-input-pass').value.trim();
+            const input = document.getElementById('lock-input-pass');
             const errorMsg = document.getElementById('lock-error-msg');
-            const storedHash = localStorage.getItem('pecs_pass_hash');
+            const showError = (text) => {
+                errorMsg.innerText = text;
+                errorMsg.style.display = 'block';
+            };
 
-            if (!inputVal) {
-                if (errorMsg) {
-                    errorMsg.innerText = "Harap masukkan sandi atau PIN!";
-                    errorMsg.style.display = 'block';
-                }
+            const pin = input.value.trim();
+            if (!/^\d{4,6}$/.test(pin)) {
+                showError('PIN harus terdiri dari 4–6 angka.');
                 return;
             }
 
-            const inputHash = await hashText(inputVal);
+            const remaining = pinLockoutUntil - Date.now();
+            if (remaining > 0) {
+                showError(`Terlalu banyak percobaan. Coba lagi dalam ${Math.ceil(remaining / 1000)} detik.`);
+                return;
+            }
 
-            if (inputHash === storedHash) {
-                if (errorMsg) errorMsg.style.display = 'none';
-                document.getElementById('lock-input-pass').value = '';
+            if (await verifyPin(pin)) {
+                failedPinAttempts = 0;
+                errorMsg.style.display = 'none';
+                input.value = '';
                 document.getElementById('lock-screen-modal').style.display = 'none';
                 updateLastActiveTimestamp();
-
-                const lockType = localStorage.getItem('pecs_lock_type') || 'default';
-                if (lockType === 'default') {
-                    openPinConfigModal(true);
-                }
             } else {
-                if (errorMsg) {
-                    errorMsg.innerText = "Sandi atau PIN salah, silakan coba lagi.";
-                    errorMsg.style.display = 'block';
+                failedPinAttempts++;
+                input.value = '';
+                if (failedPinAttempts >= 5) {
+                    failedPinAttempts = 0;
+                    pinLockoutUntil = Date.now() + 30000;
+                    showError('Terlalu banyak percobaan. Tunggu 30 detik.');
+                } else {
+                    showError('PIN salah, silakan coba lagi.');
                 }
             }
         }
@@ -636,10 +663,11 @@
         function openPinConfigModal(isFirstSetup = false) {
             const modal = document.getElementById('pin-config-modal');
             const cancelBtn = document.getElementById('btn-cancel-pin-config');
-            const currentLockType = localStorage.getItem('pecs_lock_type') || 'default';
+            const currentLockType = localStorage.getItem('pecs_lock_type') || 'unset';
             const currentTimeout = localStorage.getItem('pecs_timeout_min') || '0';
 
             if (isFirstSetup) {
+                document.getElementById('lock-screen-modal').style.display = 'none';
                 if (cancelBtn) cancelBtn.style.display = 'none';
             } else {
                 if (cancelBtn) cancelBtn.style.display = 'block';
@@ -664,8 +692,8 @@
         }
 
         function closePinConfigModal() {
-            const lockType = localStorage.getItem('pecs_lock_type') || 'default';
-            if (lockType === 'default') {
+            const lockType = localStorage.getItem('pecs_lock_type') || 'unset';
+            if (lockType === 'unset') {
                 alert('Anda wajib memilih pengaturan PIN atau Tanpa Kunci untuk melanjutkan.');
                 return;
             }
@@ -692,38 +720,36 @@
             }
 
             const modeValue = selectedMode.value;
+            const lockScreen = document.getElementById('lock-screen-modal');
 
             if (modeValue === 'none') {
                 localStorage.setItem('pecs_lock_type', 'none');
                 document.getElementById('pin-config-modal').classList.remove('open');
+                lockScreen.style.display = 'none';
                 alert('Aplikasi sekarang diatur TANPA PIN.');
                 return;
             }
 
-            if (modeValue === 'pin') {
-                const pinVal = document.getElementById('new-pin-input').value.trim();
-                const confirmVal = document.getElementById('confirm-pin-input').value.trim();
-                const timeoutVal = document.getElementById('timeout-select').value;
+            const pinVal = document.getElementById('new-pin-input').value.trim();
+            const confirmVal = document.getElementById('confirm-pin-input').value.trim();
+            const timeoutVal = document.getElementById('timeout-select').value;
 
-                if (!pinVal || pinVal.length < 4) {
-                    alert('PIN baru minimal harus 4 - 6 angka!');
-                    return;
-                }
-
-                if (pinVal !== confirmVal) {
-                    alert('Konfirmasi PIN tidak cocok! Silakan cek kembali.');
-                    return;
-                }
-
-                const newHash = await hashText(pinVal);
-                localStorage.setItem('pecs_pass_hash', newHash);
-                localStorage.setItem('pecs_lock_type', 'pin');
-                localStorage.setItem('pecs_timeout_min', timeoutVal);
-
-                updateLastActiveTimestamp();
-                document.getElementById('pin-config-modal').classList.remove('open');
-                alert('PIN baru berhasil disimpan dan diaktifkan!');
+            if (!/^\d{4,6}$/.test(pinVal)) {
+                alert('PIN harus terdiri dari 4–6 angka!');
+                return;
             }
+            if (pinVal !== confirmVal) {
+                alert('Konfirmasi PIN tidak cocok! Silakan cek kembali.');
+                return;
+            }
+
+            await storePin(pinVal);
+            localStorage.setItem('pecs_lock_type', 'pin');
+            localStorage.setItem('pecs_timeout_min', timeoutVal);
+            updateLastActiveTimestamp();
+            document.getElementById('pin-config-modal').classList.remove('open');
+            lockScreen.style.display = 'none';
+            alert('PIN baru berhasil disimpan dan diaktifkan!');
         }
 
         const idToEnDict = {
@@ -732,7 +758,7 @@
             "nasi": "rice", "roti": "bread", "biskuit": "cookie", "buah": "fruit",
             "permen": "candy", "es krim": "ice cream", "bola": "ball", "mobil": "car",
             "gelembung": "bubbles", "ayunan": "swing", "puzzle": "puzzle", "balok": "blocks",
-            "lilin": "clay", "sendok": "spoon", "gelas": "glass", "piring": "plate",
+            "plastisin": "clay", "sendok": "spoon", "gelas": "glass", "piring": "plate",
             "baju": "shirt", "celana": "pants", "sepatu": "shoes", "handuk": "towel",
             "tisu": "tissue", "tas": "bag", "piyama": "pajamas", "tablet": "tablet",
             "musik": "music", "video": "video", "buku": "book", "kamar": "bedroom",
@@ -757,9 +783,12 @@
         }
 
         function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            return String(str ?? '').replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[c]);
         }
+
+        const cardLabelMap = {};
 
         function compressImage(file, callback) {
             const reader = new FileReader();
@@ -794,15 +823,11 @@
             reader.readAsDataURL(file);
         }
 
-        async function urlToBase64(url) {
+        async function arasaacToCompressed(url) {
             const response = await fetch(url);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
             const blob = await response.blob();
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
+            return new Promise(resolve => compressImage(blob, resolve));
         }
 
         const basePecsDatabase = [
@@ -836,7 +861,7 @@
                     { id: 'v_bantu', word: 'Tolong', emoji: '🆘' },
                     { id: 'v_buka', word: 'Buka', emoji: '📂' },
                     { id: 'v_tutup', word: 'Tutup', emoji: '🔒' },
-                    { id: 'v_stop', word: 'Selesai', emoji: '🛑' },
+                    { id: 'v_stop', word: 'Stop', emoji: '🛑' },
                     { id: 'v_tidur', word: 'Tidur', emoji: '😴' },
                     { id: 'v_toilet', word: 'Toilet', emoji: '🚽' },
                     { id: 'v_pipis', word: 'Pipis', emoji: '💧' },
@@ -872,7 +897,7 @@
                     { id: 'o_puzzle', word: 'Puzzle', emoji: '🧩' },
                     { id: 'o_balok', word: 'Balok', emoji: '🧱' },
                     { id: 'o_trampolin', word: 'Trampolin', emoji: '🤸' },
-                    { id: 'o_lilin', word: 'Lilin', emoji: '🎨' }
+                    { id: 'o_lilin', word: 'Plastisin', emoji: '🎨' }
                 ]
             },
             {
@@ -928,7 +953,7 @@
                 minLevel: 3,
                 items: [
                     { id: 'ks_lapar', word: 'Lapar', emoji: '🤤' },
-                    { id: 'ks_haus', word: 'Haus', emoji: '🥤' },
+                    { id: 'ks_haus', word: 'Haus', emoji: '🚰' },
                     { id: 'ks_sakit', word: 'Sakit', emoji: '🤒' },
                     { id: 'ks_capek', word: 'Capek', emoji: '😮‍💨' },
                     { id: 'ks_panas', word: 'Panas', emoji: '🔥' },
@@ -964,7 +989,7 @@
                     { id: 'w_sekarang', word: 'Sekarang', emoji: '⏰' },
                     { id: 'w_nanti', word: 'Nanti', emoji: '⏳' },
                     { id: 'w_lagi', word: 'Lagi', emoji: '🔄' },
-                    { id: 'w_selesai', word: 'Selesai', emoji: '✅' }
+                    { id: 'w_selesai', word: 'Sudah', emoji: '✅' }
                 ]
             }
         ];
@@ -1084,7 +1109,7 @@
             }
         }
 
-        function handleLockClick() {
+        async function handleLockClick() {
             lockClickCount++;
             const lockBtn = document.getElementById('lock-btn');
             
@@ -1100,6 +1125,14 @@
 
             lockClickCount = 0;
             clearTimeout(lockResetTimer);
+            if (isChildLock && localStorage.getItem('pecs_lock_type') === 'pin') {
+                const entered = prompt('Masukkan PIN untuk membuka kunci anak:');
+                if (entered === null) return;
+                if (!(await verifyPin(entered.trim()))) {
+                    alert('PIN salah.');
+                    return;
+                }
+            }
             isChildLock = !isChildLock;
             localStorage.setItem('pecs_child_lock', JSON.stringify(isChildLock));
             updateChildLockUI();
@@ -1196,8 +1229,11 @@
 
                         const displayWord = customLabels[item.id] || item.word;
                         const safeDisplayWord = escapeHtml(displayWord);
+                        cardLabelMap[item.id] = displayWord;
 
-                        const card = document.createElement('div');
+                        const card = document.createElement('button');
+                        card.type = 'button';
+                        card.setAttribute('aria-label', displayWord);
                         card.className = `pecs-card ${cat.type}`;
                         card.id = `card_node_${item.id}`;
                         
@@ -1215,10 +1251,10 @@
 
                         card.innerHTML = `
                             ${visualContent}
-                            <span class="word">${displayWord}</span>
+                            <span class="word">${safeDisplayWord}</span>
                             <div class="edit-overlay">
                                 <button class="btn-card-action" onclick="openChangeImageModal('${item.id}', event)">📷 Gambar</button>
-                                <button class="btn-card-action btn-edit-text" onclick="editCardText('${item.id}', '${safeDisplayWord}', event)">✏️ Tulisan</button>
+                                <button class="btn-card-action btn-edit-text" onclick="editCardText('${item.id}', event)">✏️ Tulisan</button>
                                 ${(hasCustomImg || customLabels[item.id]) ? `<button class="btn-card-action btn-reset-card" onclick="resetCardCustomization('${item.id}', event)">🔄 Reset</button>` : ''}
                                 <button class="btn-card-action btn-delete-card" onclick="deleteCard('${item.id}', event)">🗑️ Hapus</button>
                             </div>
@@ -1349,76 +1385,60 @@
             }
         }
 
+        function persistCardImage(id, img) {
+            customImages[id] = img;
+            localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
+            const uc = userCards.find(c => c.id === id);
+            if (uc) {
+                uc.imageUrl = img;
+                localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
+            }
+        }
+
         async function submitNewCustomCard() {
             const catKey = document.getElementById('new-card-category').value;
             const textVal = document.getElementById('new-card-text').value.trim();
             const fileInput = document.getElementById('new-card-file');
+            const hasFile = fileInput.files && fileInput.files.length > 0;
+
+            if (!selectedArasaacUrl && !hasFile) {
+                alert('Pilih piktogram ARASAAC atau upload gambar terlebih dahulu!');
+                return;
+            }
+
+            let img;
+            try {
+                img = selectedArasaacUrl
+                    ? await arasaacToCompressed(selectedArasaacUrl)
+                    : await new Promise(resolve => compressImage(fileInput.files[0], resolve));
+            } catch (e) {
+                console.error('Gagal memproses gambar:', e);
+                alert('Gagal memuat gambar. Periksa koneksi lalu coba lagi.');
+                return;
+            }
 
             if (editingCardId) {
-                if (selectedArasaacUrl) {
-                    try {
-                        const base64Img = await urlToBase64(selectedArasaacUrl);
-                        customImages[editingCardId] = base64Img;
-                        localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
-                        closeAddCardModal();
-                        renderCategories();
-                        return;
-                    } catch (e) {
-                        console.error("Gagal mengonversi gambar:", e);
-                    }
-                } else if (fileInput.files && fileInput.files.length > 0) {
-                    compressImage(fileInput.files[0], function(compressedBase64) {
-                        customImages[editingCardId] = compressedBase64;
-                        localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
-                        closeAddCardModal();
-                        renderCategories();
-                    });
-                    return;
-                } else {
-                    alert('Pilih piktogram ARASAAC atau upload gambar terlebih dahulu!');
-                    return;
-                }
+                persistCardImage(editingCardId, img);
+                closeAddCardModal();
+                renderCategories();
+                return;
             }
 
             if (!textVal) {
                 alert('Tulisan/Label kartu tidak boleh kosong!');
                 return;
             }
-
-            if (selectedArasaacUrl) {
-                try {
-                    const base64Img = await urlToBase64(selectedArasaacUrl);
-                    saveCardToStorage(catKey, textVal, base64Img);
-                    return;
-                } catch (e) {
-                    console.error("Gagal mengonversi gambar ARASAAC:", e);
-                }
-            }
-
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Pilih piktogram ARASAAC atau upload file foto terlebih dahulu!');
-                return;
-            }
-
-            compressImage(fileInput.files[0], function(compressedBase64) {
-                saveCardToStorage(catKey, textVal, compressedBase64);
-            });
+            saveCardToStorage(catKey, textVal, img);
         }
 
         function saveCardToStorage(catKey, textVal, imageUrl) {
-            const newCardId = 'custom_card_' + Date.now();
-
-            const newCardObj = {
-                id: newCardId,
-                catKey: catKey,
-                word: textVal,
-                imageUrl: imageUrl
-            };
-
-            userCards.push(newCardObj);
+            const newCardObj = { id: 'custom_card_' + Date.now(), catKey: catKey, word: textVal, imageUrl: imageUrl };
+            const previous = userCards;
+            userCards = [...userCards, newCardObj];
             try {
                 localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
             } catch (err) {
+                userCards = previous;
                 alert('Memori penyimpanan penuh. Coba hapus beberapa kartu lama.');
                 return;
             }
@@ -1428,9 +1448,9 @@
             alert('Kartu PECS baru berhasil ditambahkan!');
         }
 
-        function editCardText(itemId, currentText, event) {
+        function editCardText(itemId, event) {
             event.stopPropagation();
-            const newText = prompt('Masukkan tulisan/nama baru untuk kartu ini:', currentText);
+            const newText = prompt('Masukkan tulisan/nama baru untuk kartu ini:', cardLabelMap[itemId] || '');
             if (newText !== null && newText.trim() !== '') {
                 customLabels[itemId] = newText.trim();
                 localStorage.setItem('pecs_custom_labels', JSON.stringify(customLabels));
@@ -1444,6 +1464,11 @@
             delete customLabels[itemId];
             localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
             localStorage.setItem('pecs_custom_labels', JSON.stringify(customLabels));
+            const uc = userCards.find(c => c.id === itemId);
+            if (uc && uc.imageUrl) {
+                uc.imageUrl = null;
+                localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
+            }
             renderCategories();
         }
 
@@ -1489,8 +1514,9 @@
                 elem.innerHTML = `
                     <span class="item-remove-btn" title="Hapus kata ini">×</span>
                     ${visualContent}
-                    <span class="word">${item.word}</span>
+                    <span class="word"></span>
                 `;
+                elem.querySelector('.word').textContent = item.word;
                 strip.appendChild(elem);
             });
         }
@@ -1516,6 +1542,8 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'id-ID';
+                const idVoice = window.speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('id'));
+                if (idVoice) utterance.voice = idVoice;
                 utterance.rate = 0.85;
                 window.speechSynthesis.speak(utterance);
             }
