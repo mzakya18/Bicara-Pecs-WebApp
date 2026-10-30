@@ -12,40 +12,44 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Header Aplikasi -->
+  <!-- Header Utama -->
   <header class="app-header">
     <div class="header-left">
-      <h1 class="app-title">🗣️ Bicara PECS</h1>
+      <h1 class="app-title">Halo! 🗣️ Bicara PECS</h1>
     </div>
     <div class="header-right">
       <button id="btn-settings" class="icon-btn" aria-label="Pengaturan">⚙️</button>
     </div>
   </header>
 
-  <!-- Papan Kalimat Utama (Sentence Strip) -->
+  <!-- Kontainer Utama -->
   <main class="main-container">
+    <!-- Papan Kalimat (Sentence Strip) -->
     <section class="sentence-strip-container">
-      <div class="strip-label">Papan Kalimat:</div>
+      <div class="strip-header">
+        <span class="strip-label">Papan Kalimat:</span>
+      </div>
       <div id="sentence-strip" class="sentence-strip">
         <span id="placeholder-text" class="placeholder-text">Sentuh kartu di bawah untuk menyusun kalimat...</span>
       </div>
       <div class="strip-actions">
-        <button id="btn-speak" class="action-btn btn-speak" title="Bicara">🔊 Bicara</button>
-        <button id="btn-clear" class="action-btn btn-clear" title="Hapus Kalimat">🗑️ Hapus</button>
+        <button id="btn-speak" class="action-btn btn-speak">🔊 Bicara</button>
+        <button id="btn-undo" class="action-btn btn-undo">⏪ Batal</button>
+        <button id="btn-clear" class="action-btn btn-clear">🗑️ Hapus</button>
       </div>
     </section>
 
-    <!-- Navigasi Kategori -->
+    <!-- Pemilihan Kategori -->
     <nav class="category-nav">
       <div id="category-bar" class="category-bar">
-        <!-- Kategori akan diisi dinamis oleh app.js -->
+        <!-- Generasi Dinamis via app.js -->
       </div>
     </nav>
 
     <!-- Grid Kartu PECS -->
     <section class="cards-section">
       <div id="cards-grid" class="cards-grid">
-        <!-- Kartu kosakata akan diisi dinamis oleh app.js -->
+        <!-- Generasi Dinamis via app.js -->
       </div>
     </section>
   </main>
@@ -58,9 +62,9 @@
         <button id="btn-close-settings" class="close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <!-- Pilihan Gender -->
+        <!-- Profil Gender Anak -->
         <div class="setting-item">
-          <label class="setting-label">Profil Anak (Gender):</label>
+          <label class="setting-label">Profil Gender Anak:</label>
           <div class="gender-selector">
             <button id="gender-boy" class="gender-btn">👦🏻 Laki-laki</button>
             <button id="gender-girl" class="gender-btn">👧🏻 Perempuan</button>
@@ -70,7 +74,7 @@
         <!-- Toggle Tema Kaca iOS -->
         <div class="setting-item">
           <label for="toggle-glass-theme" class="setting-label-row">
-            <span>Tema Kaca iOS (Transparan)</span>
+            <span>Tema Kaca iOS (Transparan Blur)</span>
             <input type="checkbox" id="toggle-glass-theme" class="toggle-switch">
           </label>
         </div>
@@ -80,7 +84,7 @@
         <!-- Cadangkan & Pulihkan Data -->
         <div class="setting-item">
           <label class="setting-label">Cadangkan & Pulihkan Data:</label>
-          <p class="setting-desc">Simpan data pengaturan dan kalimat ke penyimpanan perangkat, WhatsApp, atau Google Drive.</p>
+          <p class="setting-desc">Simpan atau muat data pengaturan aplikasi ke file lokal, WhatsApp, atau Google Drive.</p>
           <div class="backup-actions">
             <button id="btn-backup" class="btn-secondary">💾 Cadangkan Data</button>
             <button id="btn-restore-trigger" class="btn-secondary">📂 Pulihkan Data</button>
@@ -91,14 +95,14 @@
     </div>
   </div>
 
-  <!-- Modal Pengingat Backup Bulanan (Tanggal 1) -->
+  <!-- Modal Pengingat Cadangan Bulanan (Setiap Tanggal 1) -->
   <div id="modal-backup-reminder" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
         <h2>📅 Pengingat Cadangan Bulanan</h2>
       </div>
       <div class="modal-body">
-        <p>Hari ini adalah tanggal 1! Mari cadangkan data perkembangan dan pengaturan komunikasi anak Anda agar selalu aman.</p>
+        <p>Hari ini tanggal 1. Mari cadangkan data preferensi dan pengaturan aplikasi agar tersimpan dengan aman.</p>
         <div class="modal-actions">
           <button id="btn-do-monthly-backup" class="btn-primary">💾 Cadangkan Sekarang</button>
           <button id="btn-skip-monthly-backup" class="btn-text">Nanti Saja</button>
@@ -107,20 +111,20 @@
     </div>
   </div>
 
-  <!-- Modal Selamat Datang / Opsi Restore Awal -->
+  <!-- Modal Selamat Datang (Awal Instalasi / Pulihkan Awal) -->
   <div id="modal-welcome" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2>Selamat Datang di Bicara PECS</h2>
+    <div class="modal-card text-center">
+      <div class="modal-header justify-center">
+        <h2>Halo! Selamat Datang</h2>
       </div>
-      <div class="modal-body text-center">
-        <p>Pilih profil anak untuk memulai komunikasi:</p>
+      <div class="modal-body">
+        <p>Pilih profil gender anak untuk memulai:</p>
         <div class="gender-selector justify-center margin-v">
           <button id="welcome-boy" class="gender-btn">👦🏻 Laki-laki</button>
           <button id="welcome-girl" class="gender-btn">👧🏻 Perempuan</button>
         </div>
         <hr class="divider">
-        <p class="setting-desc">Pernah mencadangkan data sebelumnya?</p>
+        <p class="setting-desc">Pernah menyimpan file cadangan data sebelumnya?</p>
         <button id="welcome-restore" class="btn-secondary">📂 Pulihkan Data Cadangan</button>
       </div>
     </div>
