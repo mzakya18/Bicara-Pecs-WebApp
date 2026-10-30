@@ -2,31 +2,31 @@
  * Bicara PECS WebApp - Core Controller
  */
 
-// Database Kosakata Terstruktur Berdasarkan Kategori & Aturan
+// Peta Kosakata Lengkap (Sesuai update kosakata.txt)
 const VOCABULARY_DATA = {
   orang: [
-    { id: 'saya', label: 'Saya', emojiBoy: '🧒🏻', emojiGirl: '👧🏻', arasaacId: 7089 },
-    { id: 'ayah', label: 'Ayah', emoji: '🧔🏻', arasaacId: 7085 },
-    { id: 'ibu', label: 'Ibu', emoji: '👩🏻', arasaacId: 7086 },
-    { id: 'kakak', label: 'Kakak', emoji: '👦🏻', arasaacId: 7087 },
-    { id: 'adik', label: 'Adik', emoji: '👶🏻', arasaacId: 7088 },
-    { id: 'kakek', label: 'Kakek', emoji: '👴🏻', arasaacId: 7091 },
-    { id: 'nenek', label: 'Nenek', emoji: '👵🏻', arasaacId: 7092 }
+    { id: 'saya', label: 'Saya', emojiBoy: '🧒🏻', emojiGirl: '👧🏻' },
+    { id: 'ayah', label: 'Ayah', emoji: '🧔🏻' },
+    { id: 'ibu', label: 'Ibu', emoji: '👩🏻' },
+    { id: 'kakak', label: 'Kakak', emoji: '👦🏻', arasaacId: 2321 },
+    { id: 'adik', label: 'Adik', emoji: '👶🏻', arasaacId: 32742 },
+    { id: 'kakek', label: 'Kakek', emoji: '👴🏻', arasaacId: 2480 },
+    { id: 'nenek', label: 'Nenek', emoji: '👵🏻', arasaacId: 2481 }
   ],
   aksi: [
-    { id: 'lihat', label: 'Lihat', emoji: '👀', arasaacId: 6110 },
-    { id: 'makan', label: 'Makan', emoji: '🍽️', arasaacId: 6013 },
-    { id: 'minum', label: 'Minum', emoji: '🥤', arasaacId: 6014 },
-    { id: 'main', label: 'Main', emoji: '🧸', arasaacId: 6040 },
-    { id: 'duduk', label: 'Duduk', emoji: '🪑', arasaacId: 6025 },
-    { id: 'tolong', label: 'Tolong', emoji: '🤲🏻', arasaacId: 6080 },
-    { id: 'buka', label: 'Buka', emoji: '🔓', arasaacId: 6030 },
-    { id: 'tutup', label: 'Tutup', emoji: '🔒', arasaacId: 6031 },
-    { id: 'stop', label: 'Stop', emoji: '✋🏻', arasaacId: 6090 },
-    { id: 'tidur', label: 'Tidur', emoji: '🛌🏻', arasaacId: 6015 },
-    { id: 'pipis', label: 'Pipis', emoji: '🚽', arasaacId: 6050 },
-    { id: 'bab', label: 'BAB', emoji: '💩', arasaacId: 6051 },
-    { id: 'buangsampah', label: 'Buang Sampah', emoji: '🚮', arasaacId: 6070 }
+    { id: 'lihat', label: 'Lihat', emoji: '👀' },
+    { id: 'makan', label: 'Makan', emoji: '🍽️', arasaacId: 2529 },
+    { id: 'minum', label: 'Minum', emoji: '🥤', arasaacId: 2530 },
+    { id: 'main', label: 'Main', emoji: '🧸', arasaacId: 2533 },
+    { id: 'duduk', label: 'Duduk', emoji: '🪑', arasaacId: 2535 },
+    { id: 'tolong', label: 'Tolong', emoji: '🤲🏻', arasaacId: 6982 },
+    { id: 'buka', label: 'Buka', emoji: '🔓', arasaacId: 2541 },
+    { id: 'tutup', label: 'Tutup', emoji: '🔒', arasaacId: 2542 },
+    { id: 'stop', label: 'Stop', emoji: '✋🏻' },
+    { id: 'tidur', label: 'Tidur', emoji: '🛌🏻' },
+    { id: 'pipis', label: 'Pipis', emoji: '🚽', arasaacId: 6927 },
+    { id: 'bab', label: 'BAB', emoji: '💩', arasaacId: 6928 },
+    { id: 'buangsampah', label: 'Buang Sampah', emoji: '🚮' }
   ],
   makanan: [
     { id: 'anggur', label: 'Anggur', emoji: '🍇' },
@@ -51,18 +51,18 @@ const VOCABULARY_DATA = {
     { id: 'kacang', label: 'Kacang', emoji: '🥜' },
     { id: 'kiwi', label: 'Kiwi', emoji: '🥝' },
     { id: 'udang', label: 'Udang', emoji: '🦐' },
-    { id: 'mangga', label: 'Mangga', emoji: '🥭' },
-    { id: 'jamur', label: 'Jamur', emoji: '🍄' }
+    { id: 'mangga', label: 'Mangga', emoji: '🫒' },
+    { id: 'jamur', label: 'Jamur', emoji: '🍄‍🟫' }
   ],
   mainan: [
     { id: 'robot', label: 'Robot', emoji: '🤖' },
     { id: 'perosotan', label: 'Perosotan', emoji: '🛝' },
-    { id: 'balok', label: 'Balok', emoji: '🧱', arasaacId: 8010 }
+    { id: 'balok', label: 'Balok', emoji: '🧱', arasaacId: 3034 }
   ],
   peralatan: [
-    { id: 'garpu', label: 'Garpu', emoji: '🍴', arasaacId: 8020 },
-    { id: 'piring', label: 'Piring', emoji: '🍽️', arasaacId: 8021 },
-    { id: 'gelas', label: 'Gelas', emoji: '🥛', arasaacId: 8022 }
+    { id: 'garpu', label: 'Garpu', emoji: '🍴', arasaacId: 2816 },
+    { id: 'piring', label: 'Piring', emoji: '🍽️', arasaacId: 2814 },
+    { id: 'gelas', label: 'Gelas', emoji: '🥛', arasaacId: 2815 }
   ],
   media: [
     { id: 'hp', label: 'HP', emoji: '📱' },
@@ -72,20 +72,20 @@ const VOCABULARY_DATA = {
     { id: 'kamera', label: 'Kamera', emoji: '📸' }
   ],
   tempat: [
-    { id: 'meja', label: 'Meja', emoji: '🪑', arasaacId: 9010 },
-    { id: 'diluar', label: 'Di luar', emoji: '🌳', arasaacId: 9011 },
-    { id: 'didalam', label: 'Di dalam', emoji: '🏠', arasaacId: 9012 },
+    { id: 'meja', label: 'Meja', emoji: '🪑', arasaacId: 2820 },
+    { id: 'diluar', label: 'Di luar', emoji: '🌳', arasaacId: 2548 },
+    { id: 'didalam', label: 'Di dalam', emoji: '🏠', arasaacId: 2547 },
     { id: 'pombensin', label: 'Di Pom Bensin', emoji: '⛽' },
     { id: 'bank', label: 'Di Bank', emoji: '🏦' },
     { id: 'masjid', label: 'Di Masjid', emoji: '🕌' },
     { id: 'tempatsampah', label: 'Di Tempat Sampah', emoji: '🗑️' }
   ],
   perasaan: [
-    { id: 'lapar', label: 'Lapar', emoji: '😋', arasaacId: 5010 },
-    { id: 'haus', label: 'Haus', emoji: '🥤', arasaacId: 5011 },
-    { id: 'panas', label: 'Panas', emoji: '🥵', arasaacId: 5012 },
-    { id: 'dingin', label: 'Dingin', emoji: '🥶', arasaacId: 5013 },
-    { id: 'berisik', label: 'Berisik', emoji: '🔊', arasaacId: 5014 },
+    { id: 'lapar', label: 'Lapar', emoji: '😋', arasaacId: 5374 },
+    { id: 'haus', label: 'Haus', emoji: '🥤', arasaacId: 5375 },
+    { id: 'panas', label: 'Panas', emoji: '🥵', arasaacId: 6936 },
+    { id: 'dingin', label: 'Dingin', emoji: '🥶', arasaacId: 6937 },
+    { id: 'berisik', label: 'Berisik', emoji: '🔊', arasaacId: 6938 },
     { id: 'takut', label: 'Takut', emoji: '😣' },
     { id: 'marah', label: 'Marah', emoji: '😡' },
     { id: 'sayang', label: 'Sayang', emoji: '🥰' },
@@ -95,10 +95,10 @@ const VOCABULARY_DATA = {
     { id: 'suka', label: 'Suka', emoji: '🤩' }
   ],
   ukuran: [
-    { id: 'besar', label: 'Besar', emoji: '🐘', arasaacId: 4010 },
-    { id: 'kecil', label: 'Kecil', emoji: '🐭', arasaacId: 4011 },
-    { id: 'banyak', label: 'Banyak', emoji: '🔢', arasaacId: 4012 },
-    { id: 'sedikit', label: 'Sedikit', emoji: '👤', arasaacId: 4013 }
+    { id: 'besar', label: 'Besar', emoji: '🐘', arasaacId: 3350 },
+    { id: 'kecil', label: 'Kecil', emoji: '🐭', arasaacId: 3351 },
+    { id: 'banyak', label: 'Banyak', emoji: '🔢', arasaacId: 3352 },
+    { id: 'sedikit', label: 'Sedikit', emoji: '👤', arasaacId: 3353 }
   ],
   waktu: [
     { id: 'jam1', label: 'Jam 1', emoji: '🕐' },
@@ -113,29 +113,29 @@ const VOCABULARY_DATA = {
     { id: 'jam10', label: 'Jam 10', emoji: '🕙' },
     { id: 'jam11', label: 'Jam 11', emoji: '🕚' },
     { id: 'jam12', label: 'Jam 12', emoji: '🕛' },
-    { id: 'hariini', label: 'Hari ini', emoji: '📅', arasaacId: 3010 },
-    { id: 'besok', label: 'Besok', emoji: '📆➡️', arasaacId: 3011 },
-    { id: 'kemarin', label: 'Kemarin', emoji: '⬅️📆', arasaacId: 3012 },
-    { id: 'lagi', label: 'Lagi', emoji: '🔄', arasaacId: 3013 },
-    { id: 'sudah', label: 'Sudah', emoji: '✅', arasaacId: 3014 }
+    { id: 'hariini', label: 'Hari ini', emoji: '📅', arasaacId: 2555 },
+    { id: 'besok', label: 'Besok', emoji: '📆', arasaacId: 2556 },
+    { id: 'kemarin', label: 'Kemarin', emoji: '🗓️', arasaacId: 2554 },
+    { id: 'lagi', label: 'Lagi', emoji: '🔄', arasaacId: 2557 },
+    { id: 'sudah', label: 'Sudah', emoji: '✅', arasaacId: 2558 }
   ]
 };
 
 // State Aplikasi
 let appState = {
-  gender: localStorage.getItem('pecs_gender') || 'boy', // 'boy' atau 'girl'
+  gender: localStorage.getItem('pecs_gender') || 'boy',
   glassTheme: localStorage.getItem('pecs_glass_theme') === 'true',
   currentCategory: 'orang',
   sentence: []
 };
 
-// Elemen DOM
+// Element DOM
 const categoryBar = document.getElementById('category-bar');
 const cardsGrid = document.getElementById('cards-grid');
 const sentenceStrip = document.getElementById('sentence-strip');
 const placeholderText = document.getElementById('placeholder-text');
 
-// Inisialisasi Saat Dokumen Siap
+// Inisialisasi Aplikasi
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initCategories();
@@ -183,7 +183,7 @@ function initCategories() {
   });
 }
 
-// Rendering Kartu PECS
+// Render Grid Kartu PECS
 function renderCards(categoryKey) {
   cardsGrid.innerHTML = '';
   const items = VOCABULARY_DATA[categoryKey] || [];
@@ -192,16 +192,16 @@ function renderCards(categoryKey) {
     const card = document.createElement('div');
     card.className = 'pecs-card';
 
-    // Tentukan emoji berdasarkan gender untuk kata 'saya'
     let displayEmoji = item.emoji;
     if (item.id === 'saya') {
       displayEmoji = appState.gender === 'girl' ? item.emojiGirl : item.emojiBoy;
     }
 
-    // Gunakan ARASAAC image jika ada ID-nya, jika tidak gunakan emoji
     if (item.arasaacId) {
+      const imgUrl = `https://static.arasaac.org/pictograms/${item.arasaacId}/${item.arasaacId}_300.png`;
       card.innerHTML = `
-        <img src="https://api.arasaac.org/api/pictograms/${item.arasaacId}" alt="${item.label}" onerror="this.onerror=null; this.outerHTML='<span class=\'card-emoji\'>${displayEmoji}</span>';">
+        <img src="${imgUrl}" alt="${item.label}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span class="card-emoji" style="display:none;">${displayEmoji}</span>
         <span class="card-label">${item.label}</span>
       `;
     } else {
@@ -224,12 +224,14 @@ function addToSentence(item, emoji) {
   
   const card = document.createElement('div');
   card.className = 'pecs-card';
-  card.style.width = '80px';
+  card.style.width = '82px';
   card.style.flexShrink = '0';
 
   if (item.arasaacId) {
+    const imgUrl = `https://static.arasaac.org/pictograms/${item.arasaacId}/${item.arasaacId}_300.png`;
     card.innerHTML = `
-      <img src="https://api.arasaac.org/api/pictograms/${item.arasaacId}" style="width:36px;height:36px;">
+      <img src="${imgUrl}" style="width:36px;height:36px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <span class="card-emoji" style="display:none; font-size:1.8rem;">${emoji}</span>
       <span class="card-label" style="font-size:0.75rem">${item.label}</span>
     `;
   } else {
@@ -239,7 +241,7 @@ function addToSentence(item, emoji) {
     `;
   }
 
-  // Tap untuk menghapus kata dari kalimat
+  // Klik kartu di papan kalimat untuk menghapus kata tersebut saja
   card.addEventListener('click', () => {
     const index = appState.sentence.indexOf(item);
     if (index > -1) {
@@ -254,7 +256,7 @@ function addToSentence(item, emoji) {
   sentenceStrip.appendChild(card);
 }
 
-// Fungsi Suara (Text-To-Speech Bahasa Indonesia Baku)
+// Suara (Text-To-Speech Bahasa Indonesia Baku)
 function speakSentence() {
   if (appState.sentence.length === 0) return;
 
@@ -263,14 +265,29 @@ function speakSentence() {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.lang = 'id-ID';
-    utterance.rate = 0.9;
+    utterance.rate = 0.85;
     window.speechSynthesis.speak(utterance);
   } else {
-    alert('Sistem suara tidak didukung di perangkat ini.');
+    alert('Sistem suara tidak didukung oleh perangkat ini.');
   }
 }
 
-// Hapus Kalimat
+// Hapus 1 Kata Terakhir (Batal)
+function undoSentence() {
+  if (appState.sentence.length === 0) return;
+  appState.sentence.pop();
+  
+  const cards = sentenceStrip.querySelectorAll('.pecs-card');
+  if (cards.length > 0) {
+    cards[cards.length - 1].remove();
+  }
+
+  if (appState.sentence.length === 0 && placeholderText) {
+    placeholderText.style.display = 'block';
+  }
+}
+
+// Hapus Seluruh Kalimat
 function clearSentence() {
   appState.sentence = [];
   sentenceStrip.innerHTML = '';
@@ -291,7 +308,7 @@ function setGender(gender) {
   renderCards(appState.currentCategory);
 }
 
-// Cadangkan Data (Backup)
+// Cadangkan Data (Backup JSON)
 function backupData() {
   const data = {
     gender: appState.gender,
@@ -299,17 +316,16 @@ function backupData() {
     backupDate: new Date().toISOString()
   };
 
-  const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
+  const jsonString = JSON.stringify(data, null, 2);
   const fileName = `BicaraPECS_Backup_${new Date().toISOString().slice(0, 10)}.json`;
 
-  // Coba bagikan via navigator.share jika didukung
   if (navigator.share && navigator.canShare) {
-    const file = new File([JSON.stringify(data, null, 2)], fileName, { type: 'application/json' });
+    const file = new File([jsonString], fileName, { type: 'application/json' });
     if (navigator.canShare({ files: [file] })) {
       navigator.share({
         files: [file],
         title: 'Cadangan Data Bicara PECS',
-        text: 'File cadangan data aplikasi Bicara PECS.'
+        text: 'File cadangan data pengaturan aplikasi Bicara PECS.'
       }).catch(() => downloadFallback(jsonString, fileName));
       return;
     }
@@ -318,13 +334,16 @@ function backupData() {
   downloadFallback(jsonString, fileName);
 }
 
-function downloadFallback(url, fileName) {
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', fileName);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+function downloadFallback(content, fileName) {
+  const blob = new Blob([content], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 // Pulihkan Data (Restore)
@@ -340,7 +359,7 @@ function restoreData(file) {
       document.getElementById('modal-settings').classList.add('hidden');
       document.getElementById('modal-welcome').classList.add('hidden');
     } catch (err) {
-      alert('Format file backup tidak valid.');
+      alert('Format file cadangan tidak valid.');
     }
   };
   reader.readAsText(file);
@@ -358,7 +377,7 @@ function checkMonthlyBackup() {
   }
 }
 
-// Cek Pengguna Pertama Kali
+// Cek Penggunaan Pertama Kali
 function checkFirstTime() {
   if (!localStorage.getItem('pecs_gender')) {
     document.getElementById('modal-welcome').classList.remove('hidden');
@@ -368,9 +387,10 @@ function checkFirstTime() {
 // Event Listeners Total
 function setupEventListeners() {
   document.getElementById('btn-speak').addEventListener('click', speakSentence);
+  document.getElementById('btn-undo').addEventListener('click', undoSentence);
   document.getElementById('btn-clear').addEventListener('click', clearSentence);
 
-  // Modal Settings
+  // Settings Modal
   document.getElementById('btn-settings').addEventListener('click', () => {
     document.getElementById('modal-settings').classList.remove('hidden');
   });
@@ -390,7 +410,7 @@ function setupEventListeners() {
     document.getElementById('modal-welcome').classList.add('hidden');
   });
 
-  // Toggle Theme
+  // Toggle Tema
   document.getElementById('toggle-glass-theme').addEventListener('change', (e) => {
     setTheme(e.target.checked);
   });
@@ -419,9 +439,9 @@ function setupEventListeners() {
   });
 }
 
-// Register Service Worker untuk PWA Offline
+// Service Worker Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Registration failed: ', err));
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error: ', err));
   });
 }
