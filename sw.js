@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bicara-pecs-v2';
+const CACHE_NAME = 'bicara-pecs-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
