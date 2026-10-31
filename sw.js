@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bicara-pecs-v12';
+const CACHE_NAME = 'bicara-pecs-v13';
 const APP_SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', event => {
