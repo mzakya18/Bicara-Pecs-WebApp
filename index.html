@@ -57,7 +57,7 @@
         }
         
         .page { display: none; padding: 15px; max-width: 800px; margin: 0 auto; min-height: 100vh; padding-bottom: 80px; box-sizing: border-box; }
-        .page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        .page.active { display: block; animation: pageIn 0.5s var(--ease-ios) both; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .card-container { background: var(--card-bg); padding: 25px; border-radius: 15px; box-shadow: var(--shadow); margin-top: 2vh; transition: 0.3s; }
@@ -105,8 +105,6 @@
         .category { margin-bottom: 25px; transition: all 0.3s ease; }
         .category-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 2px solid var(--card-border); padding-bottom: 6px; }
         .category-header h3 { margin: 0; color: var(--text-color); font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
-        .toggle-cat-btn { background: none; border: none; cursor: pointer; font-size: 0.85rem; color: var(--text-color); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--card-border); }
-        .toggle-cat-btn:hover { background: var(--card-border); }
         
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .category.collapsed .grid { display: none; }
@@ -132,12 +130,6 @@
         .btn-speak { background-color: var(--primary); color: white; flex: 2 !important; }
         .btn-clear { background-color: #ef4444; color: white; }
 
-        .edit-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); border-radius: 12px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; z-index: 10; padding: 4px; box-sizing: border-box; }
-        .is-edit-mode .edit-overlay { display: flex; }
-        .btn-card-action { background: #3b82f6; color: white; border: none; padding: 4px 6px; border-radius: 5px; font-size: 11px; cursor: pointer; font-weight: bold; width: 92%; text-align: center; }
-        .btn-card-action.btn-edit-text { background: #10b981; }
-        .btn-card-action.btn-reset-card { background: #f59e0b; }
-        .btn-card-action.btn-delete-card { background: #ef4444; }
 
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay-bg); z-index: 99; backdrop-filter: blur(2px); }
         .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--sidebar-bg); z-index: 100; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 2px 0 10px rgba(0,0,0,0.2); overflow-y: auto; padding: 20px; box-sizing: border-box; }
@@ -231,6 +223,110 @@
             background: var(--bg-color);
             color: var(--text-color);
         }
+
+        /* ===== Sakelar (toggle) ===== */
+        .switch { position: relative; display: inline-block; width: 46px; height: 28px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; position: absolute; margin: 0; }
+        .switch .slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 999px; transition: background-color 0.35s cubic-bezier(0.32, 0.72, 0, 1); cursor: pointer; }
+        .switch .slider::before { content: ""; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); }
+        .switch input:checked + .slider { background: #10b981; }
+        .switch input:checked + .slider::before { transform: translateX(18px); }
+        .switch input:focus-visible + .slider { outline: 3px solid var(--primary); outline-offset: 2px; }
+        .menu-switch-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; font-weight: 600; color: var(--text-color); }
+        .cat-switch-wrap { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-color); cursor: pointer; }
+        .sidebar-menu li.menu-switch-row { cursor: default; }
+
+        /* ===== Ikon edit (⚙️) pada kartu ===== */
+        .pecs-card { position: relative; }
+        .card-gear { display: none; position: absolute; top: 6px; right: 6px; z-index: 5; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(15,23,42,0.78); color: #fff; font-size: 17px; line-height: 34px; text-align: center; padding: 0; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+        .is-edit-mode .card-gear { display: block; }
+        .card-gear:active { transform: scale(0.9); }
+
+        /* ===== Pop-up edit kartu ===== */
+        .ed-preview { width: 150px; margin: 0 auto 14px; pointer-events: none; cursor: default; }
+        body.image-only-mode #ed-preview .word { display: block !important; }
+        .ed-img-actions { display: flex; flex-direction: column; gap: 8px; }
+        .ed-img-actions .btn-secondary { margin-top: 0; }
+        .ed-results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; max-height: 180px; overflow-y: auto; }
+        .ed-result { background: var(--bg-color); border: 2px solid var(--card-border); border-radius: 10px; padding: 4px; cursor: pointer; }
+        .ed-result img { width: 100%; display: block; }
+        .ed-hint { grid-column: 1 / -1; font-size: 0.85rem; color: #64748b; text-align: center; margin: 8px 0; }
+        .ed-delete { color: #ef4444 !important; }
+
+        /* ===== Tema Glass ===== */
+        html.glass-theme { --card-bg: rgba(255,255,255,0.55); --sidebar-bg: rgba(255,255,255,0.62); --card-border: rgba(148,163,184,0.45); }
+        html.glass-theme[data-theme="dark"] { --card-bg: rgba(30,41,59,0.55); --sidebar-bg: rgba(30,41,59,0.65); --card-border: rgba(148,163,184,0.3); }
+        html.glass-theme body {
+            background-image:
+                radial-gradient(circle at 12% 8%, rgba(59,130,246,0.16), transparent 42%),
+                radial-gradient(circle at 88% 28%, rgba(16,185,129,0.13), transparent 40%),
+                radial-gradient(circle at 50% 92%, rgba(245,158,11,0.12), transparent 45%);
+            background-attachment: fixed;
+        }
+        html.glass-theme .card-container,
+        html.glass-theme .modal-content,
+        html.glass-theme .lock-card,
+        html.glass-theme .sidebar,
+        html.glass-theme #sentence-strip,
+        html.glass-theme .icon-btn,
+        html.glass-theme .btn-secondary,
+        html.glass-theme .top-bar .icon-btn {
+            -webkit-backdrop-filter: blur(20px) saturate(170%);
+            backdrop-filter: blur(20px) saturate(170%);
+            border-color: rgba(255,255,255,0.55);
+        }
+        html.glass-theme .modal { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+        html.glass-theme .pecs-card {
+            background-color: color-mix(in srgb, var(--tint, #ffffff) 62%, transparent);
+            -webkit-backdrop-filter: blur(14px) saturate(170%);
+            backdrop-filter: blur(14px) saturate(170%);
+            border-color: rgba(255,255,255,0.6);
+            box-shadow: 0 8px 22px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+        html.glass-theme .pecs-card.subjek { --tint: #fef08a; }
+        html.glass-theme .pecs-card.kata-kerja { --tint: #bbf7d0; }
+        html.glass-theme .pecs-card.benda { --tint: #fed7aa; }
+        html.glass-theme .pecs-card.sifat { --tint: #bae6fd; }
+        html.glass-theme .pecs-card.tempat { --tint: #ddd6fe; }
+        html.glass-theme .pecs-card.waktu { --tint: #e5e5e5; }
+        html.glass-theme .pecs-card.perasaan { --tint: #fbcfe8; }
+
+        /* ===== Animasi halus ala iOS ===== */
+        :root { --ease-ios: cubic-bezier(0.32, 0.72, 0, 1); --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1); }
+        @keyframes pageIn { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
+        body { transition: background-color 0.45s var(--ease-ios), color 0.45s var(--ease-ios); }
+        .btn-primary, .btn-secondary, .icon-btn, .controls button, .card-gear, .btn-card-action {
+            transition: transform 0.25s var(--ease-ios), filter 0.25s var(--ease-ios), background-color 0.3s var(--ease-ios), box-shadow 0.3s var(--ease-ios);
+        }
+        .pecs-card { transition: transform 0.35s var(--ease-ios), box-shadow 0.35s var(--ease-ios), background-color 0.45s var(--ease-ios), filter 0.25s var(--ease-ios); -webkit-tap-highlight-color: transparent; }
+        .pecs-card:active { transition-duration: 0.12s; }
+        .category { transition: opacity 0.35s var(--ease-ios), transform 0.45s var(--ease-ios); }
+        .category.collapsed .grid { display: none; }
+        .sentence-item { animation: popIn 0.45s var(--ease-spring) both; }
+
+        /* Sidebar meluncur seperti iOS */
+        .sidebar { left: 0 !important; transform: translate3d(-105%, 0, 0); transition: transform 0.5s var(--ease-ios), box-shadow 0.5s var(--ease-ios) !important; will-change: transform; }
+        .sidebar.open { transform: translate3d(0, 0, 0); }
+        .overlay { display: block !important; opacity: 0; pointer-events: none; transition: opacity 0.45s var(--ease-ios), backdrop-filter 0.45s var(--ease-ios); }
+        .overlay.show { opacity: 1; pointer-events: auto; }
+
+        /* Modal: fade + naik perlahan */
+        .modal { display: flex !important; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.35s var(--ease-ios), visibility 0.35s; }
+        .modal.open { opacity: 1; visibility: visible; pointer-events: auto; }
+        .modal .modal-content { transform: translate3d(0, 28px, 0) scale(0.96); opacity: 0; transition: transform 0.5s var(--ease-ios), opacity 0.35s var(--ease-ios); }
+        .modal.open .modal-content { transform: none; opacity: 1; }
+
+        /* Layar kunci */
+        #lock-screen-modal { transition: opacity 0.4s var(--ease-ios); }
+        .lock-card { animation: pageIn 0.5s var(--ease-ios) both; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+        }
+
+        /* ===== Cadangan & pengingat ===== */
+        .backup-hint { font-size: 0.95rem; line-height: 1.6; color: var(--text-color); background: rgba(59,130,246,0.08); border-left: 4px solid var(--primary); padding: 12px 14px; border-radius: 8px; margin: 12px 0 4px; }
+        .reminder-icon { font-size: 3rem; margin: 0; }
     </style>
 </head>
 <body>
@@ -252,6 +348,7 @@
                 <button type="button" class="btn-primary" onclick="checkUnlockPassword()">Buka Aplikasi</button>
             </form>
             <button type="button" id="btn-setup-lock" class="btn-primary" style="display:none" onclick="openPinConfigModal(true)">Atur Kunci Sekarang</button>
+            <button type="button" id="btn-restore-lock" class="btn-secondary" style="display:none" onclick="document.getElementById('restore-file').click()">📂 Pulihkan dari File Cadangan</button>
         </div>
     </div>
 
@@ -268,18 +365,20 @@
             <li onclick="goToPage('page-main'); closeMenu();"><span>🏠 Papan Utama</span></li>
             <li onclick="openAddCardModal(); closeMenu();"><span>➕ Tambah Kartu PECS</span></li>
             <li onclick="openPinConfigModal(); closeMenu();"><span>🔐 Pengaturan Kunci / PIN</span></li>
-            <li onclick="toggleImageOnlyModeFromMenu()">
+            <li class="menu-switch-row">
                 <span>🖼️ Mode Gambar Saja</span>
-                <strong id="img-only-label" style="color:var(--primary); font-size:0.85rem;">Nonaktif</strong>
+                <label class="switch" title="Mode Gambar Saja"><input type="checkbox" id="img-only-toggle" onchange="toggleImageOnlyModeFromMenu()"><span class="slider"></span></label>
             </li>
             <li onclick="goToPage('page-history'); renderHistory(); closeMenu();"><span>⏱️ Riwayat Kata (24 Jam)</span></li>
             <li onclick="goToPage('page-assessment'); closeMenu();"><span>📝 Tentukan Kemampuan</span></li>
             <li onclick="goToPage('page-references'); closeMenu();"><span>📚 Dasar Referensi</span></li>
+            <li onclick="openBackupModal(); closeMenu();"><span>💾 Cadangan & Pulihkan Data</span></li>
             <li onclick="openAboutModal(); closeMenu();"><span>ℹ️ Tentang & Tim Support</span></li>
             <li onclick="resetToDefaultSettings()" style="color: #ef4444; font-weight: bold;"><span>🔄 Reset Pengaturan Awal</span></li>
         </ul>
         
         <div class="theme-selector">
+            <div class="menu-switch-row"><span>🪟 Glass Theme</span><label class="switch" title="Glass Theme"><input type="checkbox" id="glass-toggle" onchange="toggleGlassTheme(this.checked)"><span class="slider"></span></label></div>
             <label style="font-size: 0.9rem; font-weight: bold;">🎨 Tema Tampilan</label>
             <select id="theme-select" onchange="changeTheme(this.value)">
                 <option value="light">Terang</option>
@@ -339,30 +438,33 @@
             <h3 id="modal-card-title" style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 8px;">➕ Tambah Kartu PECS Baru</h3>
             
             <div class="form-group" id="modal-cat-group">
-                <label>Kategori Bagian:</label>
+                <label>Kategori Kartu:</label>
                 <select id="new-card-category">
                     <option value="subjek">Subjek</option>
                     <option value="katakerja">Predikat (Kata Kerja)</option>
                     <option value="benda_makanan">Objek: Makanan & Minuman</option>
-                    <option value="benda_mainan">Objek: Mainan & Sensorik</option>
+                    <option value="benda_buah">Objek: Buah</option>
+                    <option value="benda_sayur">Objek: Sayur & Lauk</option>
+                    <option value="benda_mainan">Objek: Mainan</option>
                     <option value="benda_harian">Objek: Benda Harian</option>
                     <option value="benda_media">Objek: Media & Hiburan</option>
                     <option value="tempat">Keterangan Tempat</option>
-                    <option value="perasaan">Keterangan Keadaan / Sensorik</option>
-                    <option value="sifat">Keterangan Sifat / Atribut</option>
-                    <option value="waktu">Keterangan Waktu / Urutan</option>
+                    <option value="perasaan">Keterangan Keadaan & Perasaan</option>
+                    <option value="sifat">Keterangan Sifat & Warna</option>
+                    <option value="waktu">Keterangan Waktu & Urutan</option>
+                    <option value="jam">Keterangan Jam</option>
                 </select>
             </div>
 
             <div class="form-group" id="modal-text-group">
-                <label>Tulisan / Label Kartu <span style="color:#ef4444;">*</span>:</label>
+                <label>Tulisan Kartu <span style="color:#ef4444;">*</span>:</label>
                 <input type="text" id="new-card-text" placeholder="Contoh: Es Teh, Kereta, Kakak">
             </div>
 
             <div class="form-group">
-                <label>🔍 Cari Piktogram ARASAAC:</label>
+                <label>🔍 Cari Gambar:</label>
                 <p style="font-size: 0.8rem; color: #64748b; margin-top: 0; margin-bottom: 8px; line-height: 1.3;">
-                    ℹ️ <em>Pencarian bekerja paling akurat dengan kata kunci Bahasa Inggris. Anda bisa mengetik langsung atau memilih tombol kategori di bawah ini.</em>
+                    ℹ️ <em>Pencarian paling tepat memakai kata Bahasa Inggris. Ketik kata atau pilih tombol di bawah.</em>
                 </p>
                 <div style="display:flex; gap:8px;">
                     <!-- Event Keydown Enter ditambahkan di sini -->
@@ -383,7 +485,7 @@
             </div>
 
             <div class="form-group">
-                <label>Atau Upload Gambar Dari Galeri HP:</label>
+                <label>Atau Pilih Foto dari Galeri HP:</label>
                 <input type="file" id="new-card-file" accept="image/*" style="width:100%;">
             </div>
 
@@ -391,6 +493,71 @@
             <button class="btn-secondary" onclick="closeAddCardModal()">Batal</button>
         </div>
     </div>
+
+    <!-- Modal Edit Kartu -->
+    <div class="modal" id="edit-card-modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 8px;">⚙️ Edit Kartu</h3>
+
+            <div class="pecs-card ed-preview" id="ed-preview" aria-hidden="true"></div>
+
+            <div class="form-group">
+                <label>Tulisan Kartu:</label>
+                <input type="text" id="ed-text" maxlength="40" oninput="edOnTextInput()">
+                <button type="button" class="btn-secondary" onclick="edResetText()">↩️ Kembalikan Tulisan Bawaan</button>
+            </div>
+
+            <div class="form-group">
+                <label>Gambar Kartu:</label>
+                <div class="ed-img-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('ed-file').click()">📁 Pilih Foto dari HP</button>
+                    <button type="button" class="btn-secondary" onclick="edToggleSearch()">🔍 Cari Gambar ARASAAC</button>
+                    <button type="button" class="btn-secondary" onclick="edResetImage()">↩️ Kembalikan Gambar Bawaan</button>
+                </div>
+                <input type="file" id="ed-file" accept="image/*" style="display: none;" onchange="edOnFile(this)">
+                <div id="ed-search-row" style="display: none;">
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <input type="text" id="ed-search-input" placeholder="Ketik kata Bahasa Inggris..." onkeydown="if(event.key==='Enter'){event.preventDefault();edSearch();}">
+                        <button type="button" class="btn-primary" style="margin: 0; width: auto; padding: 10px 15px;" onclick="edSearch()">Cari</button>
+                    </div>
+                    <div id="ed-results" class="ed-results"></div>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="saveEditCard()">💾 Simpan Perubahan</button>
+            <button class="btn-secondary" onclick="closeEditCardModal()">Batal</button>
+            <button class="btn-secondary ed-delete" onclick="deleteFromEditModal()">🗑️ Hapus Kartu</button>
+        </div>
+    </div>
+
+    <!-- Modal Cadangan -->
+    <div class="modal" id="backup-modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 8px;">💾 Cadangan Data</h3>
+            <p class="backup-hint">
+                Cadangan menyimpan semua kartu, gambar, dan pengaturan dalam satu file.
+                Jika HP rusak, hilang, atau aplikasi terhapus, data bisa dikembalikan dari file ini.
+            </p>
+            <button class="btn-primary" onclick="backupData()">💾 Buat Cadangan</button>
+            <button class="btn-secondary" onclick="closeBackupModal(); document.getElementById('restore-file').click()">📂 Pulihkan dari File Cadangan</button>
+            <button class="btn-secondary" onclick="closeBackupModal()">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Pengingat Tanggal 1 -->
+    <div class="modal" id="reminder-modal">
+        <div class="modal-content" style="text-align: center;">
+            <p class="reminder-icon">💾</p>
+            <h3 style="margin: 8px 0;">Pengingat Cadangan Bulanan</h3>
+            <p class="backup-hint" style="text-align: left;">
+                Hari ini tanggal 1. Sebaiknya buat cadangan data bulan ini agar kartu dan pengaturan tetap aman.
+            </p>
+            <button class="btn-primary" onclick="reminderBackupNow()">💾 Buat Cadangan Sekarang</button>
+            <button class="btn-secondary" onclick="closeReminder()">Nanti Saja</button>
+        </div>
+    </div>
+
+    <input type="file" id="restore-file" accept=".json,application/json" style="display: none;" onchange="restoreFromFile(this)">
 
     <!-- Modal Tentang & Tim Support -->
     <div class="modal" id="about-modal">
@@ -447,13 +614,14 @@
             </div>
             
             <button class="btn-primary" onclick="goToPage('page-assessment')">Ayo Mulai</button>
+            <button class="btn-secondary" onclick="document.getElementById('restore-file').click()">📂 Pulihkan dari File Cadangan</button>
         </div>
     </div>
 
     <!-- Halaman Assessment -->
     <div id="page-assessment" class="page">
         <div class="card-container">
-            <h3 style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 10px;">Tentukan Kemampuan Level</h3>
+            <h3 style="margin-top: 0; border-bottom: 2px solid var(--card-border); padding-bottom: 10px;">Tentukan Tahap Kemampuan</h3>
             <p style="font-size: 0.95rem;">Pilih yang <b>Paling Sesuai</b> dengan kondisi saat ini:</p>
 
             <div class="form-group">
@@ -589,11 +757,12 @@
             const setupBtn = document.getElementById('btn-setup-lock');
             const pinInput = document.getElementById('lock-input-pass');
 
-            const show = (title, desc, pinMode) => {
+            const show = (title, desc, pinMode, showRestore = false) => {
                 lockTitle.innerText = title;
                 lockDesc.innerText = desc;
                 lockForm.style.display = pinMode ? '' : 'none';
                 setupBtn.style.display = pinMode ? 'none' : '';
+                document.getElementById('btn-restore-lock').style.display = showRestore ? '' : 'none';
                 lockModal.style.display = 'flex';
             };
 
@@ -603,7 +772,7 @@
             }
 
             if (lockType === 'unset') {
-                show('Atur Kunci Aplikasi', 'Pilih PIN atau tanpa kunci sebelum menggunakan aplikasi.', false);
+                show('Atur Kunci Aplikasi', 'Pilih PIN atau tanpa kunci. Sudah punya cadangan? Pulihkan dulu.', false, true);
                 return;
             }
 
@@ -647,6 +816,7 @@
                 input.value = '';
                 document.getElementById('lock-screen-modal').style.display = 'none';
                 updateLastActiveTimestamp();
+                setTimeout(checkMonthlyReminder, 600);
             } else {
                 failedPinAttempts++;
                 input.value = '';
@@ -788,8 +958,6 @@
             })[c]);
         }
 
-        const cardLabelMap = {};
-
         function compressImage(file, callback) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -832,148 +1000,165 @@
 
         const basePecsDatabase = [
             {
-                catKey: 'subjek',
-                categoryTitle: '👤 Subjek',
-                type: 'subjek',
-                minLevel: 2,
+                catKey: 'subjek', categoryTitle: '👤 Subjek', type: 'subjek', minLevel: 2,
                 items: [
-                    { id: 's_saya', word: 'Saya', emoji: { L: '🙋‍♂️', P: '🙋‍♀️' } },
-                    { id: 's_bunda', word: 'Bunda', emoji: '👩' },
-                    { id: 's_ayah', word: 'Ayah', emoji: '👨' },
+                    { id: 's_saya', word: 'Saya', emoji: { L: '🧒🏻', P: '👧🏻' } },
+                    { id: 's_ibu', word: 'Ibu', emoji: '👩🏻' },
+                    { id: 's_ayah', word: 'Ayah', emoji: '🧔🏻' },
+                    { id: 's_kakak', word: 'Kakak', emoji: '🧑', arasaac: 'older sibling' },
+                    { id: 's_adik', word: 'Adik', emoji: '🧒', arasaac: 'younger sibling' },
+                    { id: 's_kakek', word: 'Kakek', emoji: '👴', arasaac: 'grandfather' },
+                    { id: 's_nenek', word: 'Nenek', emoji: '👵', arasaac: 'grandmother' },
                     { id: 's_terapis', word: 'Terapis', emoji: '🧑‍🏫' },
                     { id: 's_teman', word: 'Teman', emoji: '🧑‍🤝‍🧑' }
                 ]
             },
             {
-                catKey: 'katakerja',
-                categoryTitle: '🟢 Predikat (Kata Kerja Fungsional)',
-                type: 'kata-kerja',
-                minLevel: 2,
+                catKey: 'katakerja', categoryTitle: '🟢 Predikat (Kata Kerja)', type: 'kata-kerja', minLevel: 2,
                 items: [
                     { id: 'v_mau', word: 'Mau', emoji: '🤲' },
                     { id: 'v_minta', word: 'Minta', emoji: '🖐️' },
-                    { id: 'v_lihat', word: 'Lihat', emoji: '👁️' },
-                    { id: 'v_makan', word: 'Makan', emoji: '😋' },
-                    { id: 'v_minum', word: 'Minum', emoji: '🥤' },
-                    { id: 'v_main', word: 'Main', emoji: '🎲' },
-                    { id: 'v_duduk', word: 'Duduk', emoji: '🧘' },
+                    { id: 'v_lihat', word: 'Lihat', emoji: '👀' },
+                    { id: 'v_makan', word: 'Makan', emoji: '😋', arasaac: 'eat' },
+                    { id: 'v_minum', word: 'Minum', emoji: '🥤', arasaac: 'drink' },
+                    { id: 'v_main', word: 'Main', emoji: '🎲', arasaac: 'play' },
+                    { id: 'v_duduk', word: 'Duduk', emoji: '🧘', arasaac: 'sit' },
                     { id: 'v_berdiri', word: 'Berdiri', emoji: '🧍' },
-                    { id: 'v_bantu', word: 'Tolong', emoji: '🆘' },
-                    { id: 'v_buka', word: 'Buka', emoji: '📂' },
-                    { id: 'v_tutup', word: 'Tutup', emoji: '🔒' },
-                    { id: 'v_stop', word: 'Stop', emoji: '🛑' },
-                    { id: 'v_tidur', word: 'Tidur', emoji: '😴' },
-                    { id: 'v_toilet', word: 'Toilet', emoji: '🚽' },
-                    { id: 'v_pipis', word: 'Pipis', emoji: '💧' },
-                    { id: 'v_bab', word: 'BAB', emoji: '💩' }
+                    { id: 'v_bantu', word: 'Tolong', emoji: '🆘', arasaac: 'help' },
+                    { id: 'v_buka', word: 'Buka', emoji: '📂', arasaac: 'open' },
+                    { id: 'v_tutup', word: 'Tutup', emoji: '🔒', arasaac: 'close' },
+                    { id: 'v_stop', word: 'Stop', emoji: '✋🏻' },
+                    { id: 'v_tidur', word: 'Tidur', emoji: '🛌🏻' },
+                    { id: 'v_pipis', word: 'Pipis', emoji: '💧', arasaac: 'urinate' },
+                    { id: 'v_bab', word: 'BAB', emoji: '💩', arasaac: 'poop' },
+                    { id: 'v_buang_sampah', word: 'Buang Sampah', emoji: '🚮' }
                 ]
             },
             {
-                catKey: 'benda_makanan',
-                categoryTitle: '🍎 Objek: Makanan & Minuman',
-                type: 'benda',
-                minLevel: 1,
+                catKey: 'benda_makanan', categoryTitle: '🍚 Objek: Makanan & Minuman', type: 'benda', minLevel: 1,
                 items: [
                     { id: 'o_air', word: 'Air', emoji: '💧' },
                     { id: 'o_susu', word: 'Susu', emoji: '🥛' },
                     { id: 'o_nasi', word: 'Nasi', emoji: '🍚' },
+                    { id: 'o_mie', word: 'Mie', emoji: '🍝' },
+                    { id: 'o_pizza', word: 'Pizza', emoji: '🍕' },
                     { id: 'o_roti', word: 'Roti', emoji: '🍞' },
                     { id: 'o_biskuit', word: 'Biskuit', emoji: '🍪' },
-                    { id: 'o_buah', word: 'Buah', emoji: '🍎' },
                     { id: 'o_permen', word: 'Permen', emoji: '🍬' },
+                    { id: 'o_cokelat', word: 'Cokelat', emoji: '🍫' },
                     { id: 'o_eskrim', word: 'Es Krim', emoji: '🍦' }
                 ]
             },
             {
-                catKey: 'benda_mainan',
-                categoryTitle: '🧸 Objek: Mainan & Sensorik',
-                type: 'benda',
-                minLevel: 1,
+                catKey: 'benda_buah', categoryTitle: '🍎 Objek: Buah', type: 'benda', minLevel: 1,
+                items: [
+                    { id: 'o_anggur', word: 'Anggur', emoji: '🍇' },
+                    { id: 'o_melon', word: 'Melon', emoji: '🍈' },
+                    { id: 'o_semangka', word: 'Semangka', emoji: '🍉' },
+                    { id: 'o_jeruk', word: 'Jeruk', emoji: '🍊' },
+                    { id: 'o_lemon', word: 'Lemon', emoji: '🍋' },
+                    { id: 'o_pisang', word: 'Pisang', emoji: '🍌' },
+                    { id: 'o_nanas', word: 'Nanas', emoji: '🍍' },
+                    { id: 'o_apel', word: 'Apel', emoji: '🍎' },
+                    { id: 'o_stroberi', word: 'Stroberi', emoji: '🍓' },
+                    { id: 'o_kiwi', word: 'Kiwi', emoji: '🥝' },
+                    { id: 'o_mangga', word: 'Mangga', emoji: '🥭' }
+                ]
+            },
+            {
+                catKey: 'benda_sayur', categoryTitle: '🥦 Objek: Sayur & Lauk', type: 'benda', minLevel: 1,
+                items: [
+                    { id: 'o_sayuran', word: 'Sayuran', emoji: '🥗' },
+                    { id: 'o_wortel', word: 'Wortel', emoji: '🥕' },
+                    { id: 'o_timun', word: 'Timun', emoji: '🥒' },
+                    { id: 'o_jamur', word: 'Jamur', emoji: '🍄' },
+                    { id: 'o_kentang', word: 'Kentang', emoji: '🍟' },
+                    { id: 'o_telur', word: 'Telur', emoji: '🥚' },
+                    { id: 'o_ikan', word: 'Ikan', emoji: '🐟' },
+                    { id: 'o_daging', word: 'Daging', emoji: '🍖' },
+                    { id: 'o_udang', word: 'Udang', emoji: '🦐' },
+                    { id: 'o_kacang', word: 'Kacang Tanah', emoji: '🥜' }
+                ]
+            },
+            {
+                catKey: 'benda_mainan', categoryTitle: '🧸 Objek: Mainan', type: 'benda', minLevel: 1,
                 items: [
                     { id: 'o_bola', word: 'Bola', emoji: '⚽' },
                     { id: 'o_mobil', word: 'Mobil', emoji: '🚗' },
-                    { id: 'o_gelembung', word: 'Gelembung', emoji: '🫧' },
-                    { id: 'o_ayunan', word: 'Ayunan', emoji: '🛝' },
+                    { id: 'o_perosotan', word: 'Perosotan', emoji: '🛝', arasaac: 'slide' },
                     { id: 'o_puzzle', word: 'Puzzle', emoji: '🧩' },
-                    { id: 'o_balok', word: 'Balok', emoji: '🧱' },
-                    { id: 'o_trampolin', word: 'Trampolin', emoji: '🤸' },
-                    { id: 'o_lilin', word: 'Plastisin', emoji: '🎨' }
+                    { id: 'o_balok', word: 'Balok', emoji: '🧱', arasaac: 'block' },
+                    { id: 'o_robot', word: 'Robot', emoji: '🤖' }
                 ]
             },
             {
-                catKey: 'benda_harian',
-                categoryTitle: '📦 Objek: Benda Harian',
-                type: 'benda',
-                minLevel: 1,
+                catKey: 'benda_harian', categoryTitle: '📦 Objek: Benda Harian', type: 'benda', minLevel: 1,
                 items: [
                     { id: 'o_sendok', word: 'Sendok', emoji: '🥄' },
-                    { id: 'o_gelas', word: 'Gelas', emoji: '🥛' },
-                    { id: 'o_piring', word: 'Piring', emoji: '🍽️' },
+                    { id: 'o_garpu', word: 'Garpu', emoji: '🍴', arasaac: 'fork' },
+                    { id: 'o_piring', word: 'Piring', emoji: '🍽️', arasaac: 'plate' },
+                    { id: 'o_gelas', word: 'Gelas', emoji: '🥛', arasaac: 'glass' },
                     { id: 'o_baju', word: 'Baju', emoji: '👕' },
                     { id: 'o_celana', word: 'Celana', emoji: '👖' },
                     { id: 'o_sepatu', word: 'Sepatu', emoji: '👟' },
-                    { id: 'o_handuk', word: 'Handuk', emoji: '🧖' },
                     { id: 'o_tisu', word: 'Tisu', emoji: '🧻' },
-                    { id: 'o_tas', word: 'Tas', emoji: '🎒' },
-                    { id: 'o_piyama', word: 'Piyama', emoji: '👕' }
+                    { id: 'o_tas', word: 'Tas', emoji: '🎒' }
                 ]
             },
             {
-                catKey: 'benda_media',
-                categoryTitle: '📱 Objek: Media & Hiburan',
-                type: 'benda',
-                minLevel: 1,
+                catKey: 'benda_media', categoryTitle: '📱 Objek: Media & Hiburan', type: 'benda', minLevel: 1,
                 items: [
-                    { id: 'o_tablet', word: 'Tablet', emoji: '📱' },
+                    { id: 'o_hp', word: 'HP', emoji: '📱' },
+                    { id: 'o_tv', word: 'TV', emoji: '📺' },
+                    { id: 'o_video', word: 'Video', emoji: '🎥' },
+                    { id: 'o_foto', word: 'Foto', emoji: '🤳🏻' },
+                    { id: 'o_kamera', word: 'Kamera', emoji: '📸' },
                     { id: 'o_musik', word: 'Musik', emoji: '🎵' },
-                    { id: 'o_video', word: 'Video', emoji: '📹' },
                     { id: 'o_buku', word: 'Buku', emoji: '📖' }
                 ]
             },
             {
-                catKey: 'tempat',
-                categoryTitle: '📍 Keterangan Tempat',
-                type: 'tempat',
-                minLevel: 3,
+                catKey: 'tempat', categoryTitle: '📍 Keterangan Tempat', type: 'tempat', minLevel: 3,
                 items: [
                     { id: 'k_kamar', word: 'Kamar', emoji: '🛏️' },
                     { id: 'k_toilet', word: 'Toilet', emoji: '🚽' },
-                    { id: 'k_meja', word: 'Meja', emoji: '🪑' },
-                    { id: 'k_luar', word: 'Luar', emoji: '🌳' },
-                    { id: 'k_dalam', word: 'Dalam', emoji: '🏠' },
+                    { id: 'k_meja', word: 'Meja', emoji: '🪑', arasaac: 'table' },
+                    { id: 'k_luar', word: 'Di Luar', emoji: '🌳', arasaac: 'outside' },
+                    { id: 'k_dalam', word: 'Di Dalam', emoji: '🏠', arasaac: 'inside' },
                     { id: 'k_sekolah', word: 'Sekolah', emoji: '🏫' },
                     { id: 'k_rumah', word: 'Rumah', emoji: '🏡' },
-                    { id: 'k_mobil', word: 'Mobil', emoji: '🚘' }
+                    { id: 'k_pom_bensin', word: 'Di Pom Bensin', emoji: '⛽' },
+                    { id: 'k_bank', word: 'Di Bank', emoji: '🏦' },
+                    { id: 'k_masjid', word: 'Di Masjid', emoji: '🕌' },
+                    { id: 'k_tempat_sampah', word: 'Di Tempat Sampah', emoji: '🗑️' }
                 ]
             },
             {
-                catKey: 'perasaan',
-                categoryTitle: '💬 Keterangan Keadaan / Sensorik',
-                type: 'perasaan',
-                minLevel: 3,
+                catKey: 'perasaan', categoryTitle: '💬 Keterangan Keadaan & Perasaan', type: 'perasaan', minLevel: 3,
                 items: [
-                    { id: 'ks_lapar', word: 'Lapar', emoji: '🤤' },
-                    { id: 'ks_haus', word: 'Haus', emoji: '🚰' },
+                    { id: 'ks_lapar', word: 'Lapar', emoji: '🤤', arasaac: 'hungry' },
+                    { id: 'ks_haus', word: 'Haus', emoji: '🚰', arasaac: 'thirsty' },
                     { id: 'ks_sakit', word: 'Sakit', emoji: '🤒' },
                     { id: 'ks_capek', word: 'Capek', emoji: '😮‍💨' },
-                    { id: 'ks_panas', word: 'Panas', emoji: '🔥' },
-                    { id: 'ks_dingin', word: 'Dingin', emoji: '🧊' },
-                    { id: 'ks_bising', word: 'Bising', emoji: '🔊' },
-                    { id: 'ks_gatal', word: 'Gatal', emoji: '🐜' },
-                    { id: 'ks_nyaman', word: 'Nyaman', emoji: '😌' },
-                    { id: 'ks_takut', word: 'Takut', emoji: '😨' }
+                    { id: 'ks_panas', word: 'Panas', emoji: '🔥', arasaac: 'hot' },
+                    { id: 'ks_dingin', word: 'Dingin', emoji: '🧊', arasaac: 'cold' },
+                    { id: 'ks_berisik', word: 'Berisik', emoji: '🔊', arasaac: 'noisy' },
+                    { id: 'ks_takut', word: 'Takut', emoji: '😣' },
+                    { id: 'ks_marah', word: 'Marah', emoji: '😡' },
+                    { id: 'ks_sayang', word: 'Sayang', emoji: '🥰' },
+                    { id: 'ks_menangis', word: 'Menangis', emoji: '😭' },
+                    { id: 'ks_diam', word: 'Diam', emoji: '🫢' },
+                    { id: 'ks_sedih', word: 'Sedih', emoji: '😔' },
+                    { id: 'ks_suka', word: 'Suka', emoji: '🤩' }
                 ]
             },
             {
-                catKey: 'sifat',
-                categoryTitle: '🎨 Keterangan Sifat / Atribut',
-                type: 'sifat',
-                minLevel: 3,
+                catKey: 'sifat', categoryTitle: '🎨 Keterangan Sifat & Warna', type: 'sifat', minLevel: 3,
                 items: [
-                    { id: 'sa_besar', word: 'Besar', emoji: '🐘' },
-                    { id: 'sa_kecil', word: 'Kecil', emoji: '🐭' },
-                    { id: 'sa_banyak', word: 'Banyak', emoji: '🔢' },
-                    { id: 'sa_sedikit', word: 'Sedikit', emoji: '🤏' },
+                    { id: 'sa_besar', word: 'Besar', emoji: '🐘', arasaac: 'big' },
+                    { id: 'sa_kecil', word: 'Kecil', emoji: '🐭', arasaac: 'small' },
+                    { id: 'sa_banyak', word: 'Banyak', emoji: '🔢', arasaac: 'many' },
+                    { id: 'sa_sedikit', word: 'Sedikit', emoji: '🤏', arasaac: 'few' },
                     { id: 'sa_merah', word: 'Merah', emoji: '🔴' },
                     { id: 'sa_biru', word: 'Biru', emoji: '🔵' },
                     { id: 'sa_kuning', word: 'Kuning', emoji: '🟡' },
@@ -981,15 +1166,30 @@
                 ]
             },
             {
-                catKey: 'waktu',
-                categoryTitle: '⏱️ Keterangan Waktu / Urutan',
-                type: 'waktu',
-                minLevel: 3,
+                catKey: 'waktu', categoryTitle: '⏱️ Keterangan Waktu & Urutan', type: 'waktu', minLevel: 3,
                 items: [
-                    { id: 'w_sekarang', word: 'Sekarang', emoji: '⏰' },
-                    { id: 'w_nanti', word: 'Nanti', emoji: '⏳' },
-                    { id: 'w_lagi', word: 'Lagi', emoji: '🔄' },
-                    { id: 'w_selesai', word: 'Sudah', emoji: '✅' }
+                    { id: 'w_hari_ini', word: 'Hari Ini', emoji: '📅', arasaac: 'today' },
+                    { id: 'w_besok', word: 'Besok', emoji: '🔜', arasaac: 'tomorrow' },
+                    { id: 'w_kemarin', word: 'Kemarin', emoji: '⏪', arasaac: 'yesterday' },
+                    { id: 'w_lagi', word: 'Lagi', emoji: '🔄', arasaac: 'again' },
+                    { id: 'w_sudah', word: 'Sudah', emoji: '✅', arasaac: 'done' }
+                ]
+            },
+            {
+                catKey: 'jam', categoryTitle: '🕐 Keterangan Jam', type: 'waktu', minLevel: 3,
+                items: [
+                    { id: 'j_1', word: 'Jam 1', emoji: '🕐' },
+                    { id: 'j_2', word: 'Jam 2', emoji: '🕑' },
+                    { id: 'j_3', word: 'Jam 3', emoji: '🕒' },
+                    { id: 'j_4', word: 'Jam 4', emoji: '🕓' },
+                    { id: 'j_5', word: 'Jam 5', emoji: '🕔' },
+                    { id: 'j_6', word: 'Jam 6', emoji: '🕕' },
+                    { id: 'j_7', word: 'Jam 7', emoji: '🕖' },
+                    { id: 'j_8', word: 'Jam 8', emoji: '🕗' },
+                    { id: 'j_9', word: 'Jam 9', emoji: '🕘' },
+                    { id: 'j_10', word: 'Jam 10', emoji: '🕙' },
+                    { id: 'j_11', word: 'Jam 11', emoji: '🕚' },
+                    { id: 'j_12', word: 'Jam 12', emoji: '🕛' }
                 ]
             }
         ];
@@ -1013,6 +1213,34 @@
         let userCards = safeGetStorage('pecs_user_cards', []);
         let deletedCardIds = safeGetStorage('pecs_deleted_cards', []);
         let collapsedCategories = safeGetStorage('pecs_collapsed_cats', {});
+        let arasaacCache = safeGetStorage('pecs_arasaac_cache', {});
+        const arasaacFetching = new Set();
+
+        function ensureArasaacImages(keywords) {
+            const missing = [...keywords].filter(k => !arasaacCache[k] && !arasaacFetching.has(k));
+            if (missing.length === 0) return;
+            missing.forEach(k => arasaacFetching.add(k));
+            Promise.all(missing.map(async k => {
+                try {
+                    const res = await fetch(`https://api.arasaac.org/v1/pictograms/en/search/${encodeURIComponent(k)}`);
+                    if (!res.ok) return false;
+                    const list = await res.json();
+                    if (!Array.isArray(list) || list.length === 0) return false;
+                    const id = list[0]._id;
+                    arasaacCache[k] = `https://static.arasaac.org/pictograms/${id}/${id}_300.png`;
+                    return true;
+                } catch (e) {
+                    return false;
+                } finally {
+                    arasaacFetching.delete(k);
+                }
+            })).then(results => {
+                if (results.some(Boolean)) {
+                    localStorage.setItem('pecs_arasaac_cache', JSON.stringify(arasaacCache));
+                    renderCategories();
+                }
+            });
+        }
 
         window.onscroll = function() {
             const btn = document.getElementById('btn-scroll-top');
@@ -1042,16 +1270,297 @@
         }
 
         function openMenu() {
-            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('overlay').classList.add('show');
             document.getElementById('sidebar').classList.add('open');
         }
 
         function closeMenu() {
-            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('overlay').classList.remove('show');
             document.getElementById('sidebar').classList.remove('open');
         }
 
         // --- FUNGSI MODAL ABOUT DITAMBAHKAN DI SINI --- //
+        // ===== Tema Glass =====
+        function applyGlassTheme(on) {
+            document.documentElement.classList.toggle('glass-theme', !!on);
+            const toggle = document.getElementById('glass-toggle');
+            if (toggle) toggle.checked = !!on;
+        }
+
+        function toggleGlassTheme(on) {
+            applyGlassTheme(on);
+            localStorage.setItem('pecs_glass', JSON.stringify(!!on));
+        }
+
+        // ===== Pop-up Edit Kartu =====
+        let edState = null;
+
+        function findCardInfo(id) {
+            for (const cat of basePecsDatabase) {
+                const it = cat.items.find(i => i.id === id);
+                if (it) return { item: it, defaultWord: it.word };
+            }
+            const uc = userCards.find(c => c.id === id);
+            if (uc) return { item: { id: uc.id, word: uc.word, emoji: '🖼️' }, defaultWord: uc.word };
+            return null;
+        }
+
+        function defaultEmojiOf(item) {
+            return typeof item.emoji === 'object' ? (item.emoji[userSettings.gender] || item.emoji.L) : item.emoji;
+        }
+
+        function openEditCardModal(id, event) {
+            if (event) event.stopPropagation();
+            const info = findCardInfo(id);
+            if (!info) return;
+            edState = { id: id, info: info, text: customLabels[id] || info.defaultWord, img: customImages[id] || null, imgChanged: false };
+            document.getElementById('ed-text').value = edState.text;
+            document.getElementById('ed-search-row').style.display = 'none';
+            document.getElementById('ed-search-input').value = '';
+            document.getElementById('ed-results').innerHTML = '';
+            document.getElementById('edit-card-modal').classList.add('open');
+            renderEditPreview();
+        }
+
+        function closeEditCardModal() {
+            document.getElementById('edit-card-modal').classList.remove('open');
+            edState = null;
+        }
+
+        function renderEditPreview() {
+            if (!edState) return;
+            const item = edState.info.item;
+            const label = (edState.text || '').trim() || edState.info.defaultWord;
+            let img = edState.img;
+            if (!edState.imgChanged && !img && item.arasaac) img = arasaacCache[item.arasaac] || null;
+            const visual = img
+                ? `<img src="${img}" class="card-custom-img" alt="">`
+                : `<span class="emoji">${defaultEmojiOf(item)}</span>`;
+            document.getElementById('ed-preview').innerHTML = `${visual}<span class="word">${escapeHtml(label)}</span>`;
+        }
+
+        function edOnTextInput() {
+            if (!edState) return;
+            edState.text = document.getElementById('ed-text').value;
+            renderEditPreview();
+        }
+
+        function edResetText() {
+            if (!edState) return;
+            edState.text = edState.info.defaultWord;
+            document.getElementById('ed-text').value = edState.text;
+            renderEditPreview();
+        }
+
+        function edResetImage() {
+            if (!edState) return;
+            edState.img = null;
+            edState.imgChanged = true;
+            renderEditPreview();
+        }
+
+        function edOnFile(input) {
+            if (!edState || !input.files || !input.files[0]) return;
+            compressImage(input.files[0], data => {
+                edState.img = data;
+                edState.imgChanged = true;
+                input.value = '';
+                renderEditPreview();
+            });
+        }
+
+        function edToggleSearch() {
+            const row = document.getElementById('ed-search-row');
+            row.style.display = row.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function edSearch() {
+            const q = document.getElementById('ed-search-input').value.trim().toLowerCase();
+            const box = document.getElementById('ed-results');
+            if (!q) return;
+            box.innerHTML = '<p class="ed-hint">Mencari gambar...</p>';
+            try {
+                const res = await fetch(`https://api.arasaac.org/v1/pictograms/en/search/${encodeURIComponent(q)}`);
+                const list = res.ok ? await res.json() : [];
+                box.innerHTML = '';
+                if (!Array.isArray(list) || list.length === 0) {
+                    box.innerHTML = '<p class="ed-hint">Gambar tidak ditemukan. Coba kata lain.</p>';
+                    return;
+                }
+                list.slice(0, 8).forEach(it => {
+                    const url = `https://static.arasaac.org/pictograms/${it._id}/${it._id}_300.png`;
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'ed-result';
+                    const im = document.createElement('img');
+                    im.src = url;
+                    im.alt = q;
+                    b.appendChild(im);
+                    b.onclick = () => edPick(url);
+                    box.appendChild(b);
+                });
+            } catch (e) {
+                box.innerHTML = '<p class="ed-hint">Gagal terhubung ke server ARASAAC.</p>';
+            }
+        }
+
+        function edPick(url) {
+            if (!edState) return;
+            edState.img = url;
+            edState.imgChanged = true;
+            renderEditPreview();
+        }
+
+        function removeCardImage(id) {
+            delete customImages[id];
+            localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
+            const uc = userCards.find(c => c.id === id);
+            if (uc && uc.imageUrl) {
+                uc.imageUrl = null;
+                localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
+            }
+        }
+
+        async function saveEditCard() {
+            if (!edState) return;
+            const id = edState.id;
+            const text = document.getElementById('ed-text').value.trim();
+            if (!text) {
+                alert('Tulisan kartu tidak boleh kosong!');
+                return;
+            }
+            try {
+                if (edState.imgChanged) {
+                    if (edState.img && edState.img.startsWith('https://')) {
+                        edState.img = await arasaacToCompressed(edState.img);
+                    }
+                    if (edState.img) persistCardImage(id, edState.img);
+                    else removeCardImage(id);
+                }
+                if (text === edState.info.defaultWord) delete customLabels[id];
+                else customLabels[id] = text;
+                localStorage.setItem('pecs_custom_labels', JSON.stringify(customLabels));
+            } catch (err) {
+                console.error('Gagal menyimpan kartu:', err);
+                alert('Gagal menyimpan. Periksa koneksi atau ruang penyimpanan, lalu coba lagi.');
+                return;
+            }
+            closeEditCardModal();
+            renderCategories();
+        }
+
+        function deleteFromEditModal() {
+            if (!edState) return;
+            const id = edState.id;
+            closeEditCardModal();
+            deleteCard(id, null);
+        }
+
+        // ===== Cadangan & Pulihkan Data =====
+        const BACKUP_APP = 'BicaraPECS';
+        const BACKUP_SKIP_KEYS = ['pecs_last_active', 'pecs_reminder_month'];
+
+        function openBackupModal() {
+            document.getElementById('backup-modal').classList.add('open');
+        }
+
+        function closeBackupModal() {
+            document.getElementById('backup-modal').classList.remove('open');
+        }
+
+        function collectBackupData() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && k.startsWith('pecs_') && !BACKUP_SKIP_KEYS.includes(k)) data[k] = localStorage.getItem(k);
+            }
+            return { app: BACKUP_APP, version: 1, created: new Date().toISOString(), data: data };
+        }
+
+        function backupFileName() {
+            const d = new Date();
+            const p = n => String(n).padStart(2, '0');
+            return `BicaraPECS-cadangan-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.json`;
+        }
+
+        async function backupData() {
+            const file = new File([JSON.stringify(collectBackupData(), null, 2)], backupFileName(), { type: 'application/json' });
+            try {
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: 'Cadangan Bicara PECS', text: 'Cadangan data Bicara PECS' });
+                    closeBackupModal();
+                    return;
+                }
+            } catch (e) {
+                if (e && e.name === 'AbortError') return; // dibatalkan pengguna
+            }
+            const url = URL.createObjectURL(file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            closeBackupModal();
+            alert('Cadangan sudah disimpan ke folder Unduhan. Pindahkan file tersebut ke Google Drive atau tempat aman lainnya.');
+        }
+
+        async function restoreFromFile(input) {
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+
+            let backup;
+            try {
+                backup = JSON.parse(await file.text());
+            } catch (e) {
+                alert('File tidak bisa dibaca. Pastikan Anda memilih file cadangan Bicara PECS (berakhiran .json).');
+                return;
+            }
+            if (!backup || backup.app !== BACKUP_APP || !backup.data || typeof backup.data !== 'object') {
+                alert('File ini bukan file cadangan Bicara PECS.');
+                return;
+            }
+            const keys = Object.keys(backup.data).filter(k => k.startsWith('pecs_') && typeof backup.data[k] === 'string');
+            if (keys.length === 0) {
+                alert('File cadangan ini kosong.');
+                return;
+            }
+            if (!confirm('Pulihkan data dari cadangan ini?\n\nSemua kartu dan pengaturan yang ada sekarang akan diganti.')) return;
+
+            try {
+                keys.forEach(k => localStorage.setItem(k, backup.data[k]));
+            } catch (e) {
+                alert('Memori HP penuh, pemulihan belum berhasil. Coba kosongkan ruang penyimpanan lalu ulangi.');
+                return;
+            }
+            alert('Data berhasil dipulihkan. Aplikasi akan dibuka ulang.');
+            location.reload();
+        }
+
+        // ===== Pengingat cadangan setiap tanggal 1 =====
+        function checkMonthlyReminder() {
+            const lockModal = document.getElementById('lock-screen-modal');
+            if (lockModal && lockModal.style.display === 'flex') return;
+            const now = new Date();
+            if (now.getDate() !== 1) return;
+            const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            if (localStorage.getItem('pecs_reminder_month') === monthKey) return;
+            if (!localStorage.getItem('pecs_settings')) return; // belum pernah dipakai
+            localStorage.setItem('pecs_reminder_month', monthKey);
+            document.getElementById('reminder-modal').classList.add('open');
+        }
+
+        function closeReminder() {
+            document.getElementById('reminder-modal').classList.remove('open');
+        }
+
+        function reminderBackupNow() {
+            closeReminder();
+            openBackupModal();
+        }
+
         function openAboutModal() {
             document.getElementById('about-modal').classList.add('open');
         }
@@ -1093,20 +1602,9 @@
         }
 
         function updateImageOnlyState() {
-            const label = document.getElementById('img-only-label');
-            if (isImageOnly) {
-                document.body.classList.add('image-only-mode');
-                if (label) {
-                    label.innerText = 'Aktif';
-                    label.style.color = '#10b981';
-                }
-            } else {
-                document.body.classList.remove('image-only-mode');
-                if (label) {
-                    label.innerText = 'Nonaktif';
-                    label.style.color = 'var(--primary)';
-                }
-            }
+            const toggle = document.getElementById('img-only-toggle');
+            if (toggle) toggle.checked = isImageOnly;
+            document.body.classList.toggle('image-only-mode', isImageOnly);
         }
 
         async function handleLockClick() {
@@ -1178,6 +1676,7 @@
             const container = document.getElementById('categories-container');
             if (!container) return;
             container.innerHTML = '';
+            const pendingArasaac = new Set();
 
             let activeDatabase = JSON.parse(JSON.stringify(basePecsDatabase));
 
@@ -1212,9 +1711,10 @@
                     header.className = 'category-header';
                     header.innerHTML = `
                         <h3>${cat.categoryTitle}</h3>
-                        <button class="toggle-cat-btn hide-on-lock" onclick="toggleCategoryCollapse('${cat.catKey}')">
-                            ${isCollapsed ? '👁️ Tampilkan' : '🙈 Sembunyikan'}
-                        </button>
+                        <label class="cat-switch-wrap hide-on-lock">
+                            <span>${isCollapsed ? 'Disembunyikan' : 'Tampilkan'}</span>
+                            <span class="switch"><input type="checkbox" ${isCollapsed ? '' : 'checked'} onchange="toggleCategoryCollapse('${cat.catKey}')"><span class="slider"></span></span>
+                        </label>
                     `;
                     catSection.appendChild(header);
 
@@ -1229,7 +1729,6 @@
 
                         const displayWord = customLabels[item.id] || item.word;
                         const safeDisplayWord = escapeHtml(displayWord);
-                        cardLabelMap[item.id] = displayWord;
 
                         const card = document.createElement('button');
                         card.type = 'button';
@@ -1238,26 +1737,25 @@
                         card.id = `card_node_${item.id}`;
                         
                         const hasCustomImg = !!customImages[item.id];
-                        const visualContent = hasCustomImg 
-                            ? `<img src="${customImages[item.id]}" class="card-custom-img" alt="${safeDisplayWord}">`
+                        const arasaacUrl = item.arasaac ? arasaacCache[item.arasaac] : null;
+                        const imgUrl = customImages[item.id] || arasaacUrl || null;
+                        if (!imgUrl && item.arasaac) pendingArasaac.add(item.arasaac);
+                        const fallbackHtml = escapeHtml(`<span class="emoji">${defaultEmoji}</span>`);
+                        const visualContent = imgUrl
+                            ? `<img src="${imgUrl}" class="card-custom-img" alt="${safeDisplayWord}" data-fb="${fallbackHtml}" onerror="this.outerHTML=this.dataset.fb">`
                             : `<span class="emoji">${defaultEmoji}</span>`;
 
                         card.onclick = (e) => {
                             if (!isEditMode) {
                                 triggerCardFlash(`card_node_${item.id}`);
-                                addToSentence(displayWord, defaultEmoji, customImages[item.id]);
+                                addToSentence(displayWord, defaultEmoji, imgUrl);
                             }
                         };
 
                         card.innerHTML = `
                             ${visualContent}
                             <span class="word">${safeDisplayWord}</span>
-                            <div class="edit-overlay">
-                                <button class="btn-card-action" onclick="openChangeImageModal('${item.id}', event)">📷 Gambar</button>
-                                <button class="btn-card-action btn-edit-text" onclick="editCardText('${item.id}', event)">✏️ Tulisan</button>
-                                ${(hasCustomImg || customLabels[item.id]) ? `<button class="btn-card-action btn-reset-card" onclick="resetCardCustomization('${item.id}', event)">🔄 Reset</button>` : ''}
-                                <button class="btn-card-action btn-delete-card" onclick="deleteCard('${item.id}', event)">🗑️ Hapus</button>
-                            </div>
+                            <button type="button" class="card-gear" title="Edit kartu" aria-label="Edit kartu ${safeDisplayWord}" onclick="openEditCardModal('${item.id}', event)">⚙️</button>
                         `;
                         grid.appendChild(card);
                     });
@@ -1266,6 +1764,7 @@
                     container.appendChild(catSection);
                 }
             });
+            ensureArasaacImages(pendingArasaac);
         }
 
         function triggerCardFlash(elementId) {
@@ -1277,7 +1776,7 @@
         }
 
         function deleteCard(itemId, event) {
-            event.stopPropagation();
+            if (event) event.stopPropagation();
             const confirmDelete = confirm('Apakah Anda yakin ingin menghapus kartu ini?');
             if (confirmDelete) {
                 if (Array.isArray(userCards) && userCards.some(uc => uc.id === itemId)) {
@@ -1305,16 +1804,6 @@
             document.getElementById('modal-cat-group').style.display = "block";
             document.getElementById('modal-text-group').style.display = "block";
             document.getElementById('btn-save-card').innerText = "Simpan Kartu";
-            document.getElementById('add-card-modal').classList.add('open');
-        }
-
-        function openChangeImageModal(itemId, event) {
-            event.stopPropagation();
-            editingCardId = itemId;
-            document.getElementById('modal-card-title').innerText = "📷 Ganti Gambar Kartu";
-            document.getElementById('modal-cat-group').style.display = "none";
-            document.getElementById('modal-text-group').style.display = "none";
-            document.getElementById('btn-save-card').innerText = "Simpan Gambar Baru";
             document.getElementById('add-card-modal').classList.add('open');
         }
 
@@ -1354,7 +1843,7 @@
                 }
 
                 if (!Array.isArray(data) || data.length === 0) {
-                    resultsContainer.innerHTML = '<p style="grid-column: span 4; font-size:0.85rem; text-align:center; color:#ef4444;">Piktogram tidak ditemukan. Coba kata lain.</p>';
+                    resultsContainer.innerHTML = '<p style="grid-column: span 4; font-size:0.85rem; text-align:center; color:#ef4444;">Gambar tidak ditemukan. Coba kata lain.</p>';
                     return;
                 }
 
@@ -1431,181 +1920,3 @@
             saveCardToStorage(catKey, textVal, img);
         }
 
-        function saveCardToStorage(catKey, textVal, imageUrl) {
-            const newCardObj = { id: 'custom_card_' + Date.now(), catKey: catKey, word: textVal, imageUrl: imageUrl };
-            const previous = userCards;
-            userCards = [...userCards, newCardObj];
-            try {
-                localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
-            } catch (err) {
-                userCards = previous;
-                alert('Memori penyimpanan penuh. Coba hapus beberapa kartu lama.');
-                return;
-            }
-
-            closeAddCardModal();
-            renderCategories();
-            alert('Kartu PECS baru berhasil ditambahkan!');
-        }
-
-        function editCardText(itemId, event) {
-            event.stopPropagation();
-            const newText = prompt('Masukkan tulisan/nama baru untuk kartu ini:', cardLabelMap[itemId] || '');
-            if (newText !== null && newText.trim() !== '') {
-                customLabels[itemId] = newText.trim();
-                localStorage.setItem('pecs_custom_labels', JSON.stringify(customLabels));
-                renderCategories();
-            }
-        }
-
-        function resetCardCustomization(itemId, event) {
-            event.stopPropagation();
-            delete customImages[itemId];
-            delete customLabels[itemId];
-            localStorage.setItem('pecs_custom_images', JSON.stringify(customImages));
-            localStorage.setItem('pecs_custom_labels', JSON.stringify(customLabels));
-            const uc = userCards.find(c => c.id === itemId);
-            if (uc && uc.imageUrl) {
-                uc.imageUrl = null;
-                localStorage.setItem('pecs_user_cards', JSON.stringify(userCards));
-            }
-            renderCategories();
-        }
-
-        function resetToDefaultSettings() {
-            const confirmReset = confirm('Apakah Anda yakin ingin menghapus semua kustomisasi dan mengembalikan ke pengaturan awal?');
-            if (confirmReset) {
-                localStorage.clear();
-                alert('Aplikasi telah dikembalikan ke pengaturan awal.');
-                window.location.reload();
-            }
-        }
-
-        function addToSentence(word, emoji, customImgUrl) {
-            const currentTime = new Date().getTime();
-            if (currentTime - lastClickTime < 400) return; 
-            lastClickTime = currentTime;
-
-            currentSentence.push({ word, emoji, customImgUrl });
-            saveToHistory(word);
-            updateSentenceStrip();
-            speakText(word);
-        }
-
-        function updateSentenceStrip() {
-            const strip = document.getElementById('sentence-strip');
-            if (!strip) return;
-
-            if (currentSentence.length === 0) {
-                strip.innerHTML = '<span style="color: #94a3b8; width: 100%; text-align: center; font-size: 0.95rem;" id="placeholder-text">Ketuk gambar di bawah untuk menyusun kalimat...</span>';
-                return;
-            }
-
-            strip.innerHTML = '';
-            currentSentence.forEach((item, index) => {
-                const elem = document.createElement('div');
-                elem.className = 'sentence-item';
-                elem.onclick = () => removeFromSentence(index);
-
-                const visualContent = item.customImgUrl 
-                    ? `<img src="${item.customImgUrl}" class="card-custom-img" alt="${escapeHtml(item.word)}">`
-                    : `<span class="emoji">${item.emoji}</span>`;
-
-                elem.innerHTML = `
-                    <span class="item-remove-btn" title="Hapus kata ini">×</span>
-                    ${visualContent}
-                    <span class="word"></span>
-                `;
-                elem.querySelector('.word').textContent = item.word;
-                strip.appendChild(elem);
-            });
-        }
-
-        function removeFromSentence(index) {
-            currentSentence.splice(index, 1);
-            updateSentenceStrip();
-        }
-
-        function clearSentence() {
-            currentSentence = [];
-            updateSentenceStrip();
-        }
-
-        function speakSentence() {
-            if (currentSentence.length === 0) return;
-            const teksBicara = currentSentence.map(item => item.word).join(" ");
-            speakText(teksBicara);
-        }
-
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'id-ID';
-                const idVoice = window.speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('id'));
-                if (idVoice) utterance.voice = idVoice;
-                utterance.rate = 0.85;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function saveToHistory(word) {
-            const now = new Date().getTime();
-            wordHistory.unshift({ word, timestamp: now });
-            wordHistory = wordHistory.filter(item => (now - item.timestamp) < 86400000);
-            localStorage.setItem('pecs_history', JSON.stringify(wordHistory));
-        }
-
-        function renderHistory() {
-            const historyList = document.getElementById('history-list');
-            if (!historyList) return;
-
-            const now = new Date().getTime();
-            wordHistory = wordHistory.filter(item => (now - item.timestamp) < 86400000);
-            
-            if (wordHistory.length === 0) {
-                historyList.innerHTML = '<p style="text-align:center; color:#94a3b8;">Belum ada riwayat kata hari ini.</p>';
-                return;
-            }
-
-            historyList.innerHTML = wordHistory.map(item => {
-                const date = new Date(item.timestamp);
-                const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                return `
-                    <div class="history-item">
-                        <span class="word">${escapeHtml(item.word)}</span>
-                        <span class="time">${timeStr}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        window.onload = async () => {
-            const savedTheme = localStorage.getItem('pecs_theme');
-            if (savedTheme) {
-                const selectTheme = document.getElementById('theme-select');
-                if (selectTheme) selectTheme.value = savedTheme;
-                changeTheme(savedTheme);
-            }
-
-            await evaluateAppLock();
-
-            updateImageOnlyState();
-            updateChildLockUI();
-
-            if (userSettings) {
-                const radio = document.querySelector(`input[name="level"][value="${userSettings.level}"]`);
-                if (radio) radio.checked = true;
-                
-                const genderSelect = document.getElementById('select-gender');
-                if (genderSelect && userSettings.gender) genderSelect.value = userSettings.gender;
-            }
-
-            renderCategories();
-
-            const lastActivePage = localStorage.getItem('pecs_active_page') || 'page-welcome';
-            goToPage(lastActivePage);
-        };
-    </script>
-</body>
-</html>
